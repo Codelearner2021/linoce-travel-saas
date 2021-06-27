@@ -637,3 +637,40 @@ h3.title {
 .option-item-text {
   font-size: .8em;
 }
+.datetime-picker-control > input {
+  height: 25px;
+  font-size: .9em;
+  color: #4a54f1;
+}
+.search-control-group > .row {
+  margin: 4px 2px;
+}
+.trip-selector {
+  text-align: center;
+}
+.trip-selector input {
+  display: inline;
+  width: 20px;
+  padding: 0px;
+  margin: 0px 5px;
+  height: 15px;  
+}
+.rdtPicker {
+  min-width: 210px !important;
+}
+.rdtPicker td {
+  font-size: 12px;
+}
+.rdtPicker td, .rdtPicker th {
+  height: 24px !important;
+}
+.rdtPicker td.rdtToday {
+  position: relative;
+  background-color: #badaf9;
+}
+.rdtPicker .dow {
+  font-size: 13px;
+}
+.rdtPicker th.rdtSwitch {
+  font-size: 13px;
+}

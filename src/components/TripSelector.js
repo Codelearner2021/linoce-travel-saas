@@ -1,10 +1,14 @@
-import React, { Component, Fragment, useState } from "react";
+import React, { Component, Fragment, useEffect, useState } from "react";
 import Select from 'react-select';
 import { TabContent, TabPane, Nav, NavItem, NavLink, Card, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
 import { withRouter } from "react-router-dom";
 import { observer, inject } from 'mobx-react';
+import Datetime from 'react-datetime';
+import "react-datetime/css/react-datetime.css";
 
 import "../App.css";
+
+var moment = require('moment');
 
 var data = [
     {id: 1, name: "Kolkata", code: "CCU", enable: true},
@@ -16,10 +20,15 @@ var data = [
 ];
 
 
-const TripSelector = ({ selected_trip }) => {
+const TripSelector = ({ selected_trip, trip_type }) => {
     const { source_city, destination_city, departure_date, return_date, traveller_choice } = selected_trip;
     const [sourceCity, setSourceCity] = useState('');
     const [destinationCity, setDestinationCity] = useState('');
+    const [showReturnDate, setShowReturnDate] = useState(false);
+
+    useEffect(() => {
+        setShowReturnDate(trip_type === 'Roundtrip');
+    });
 
     const onChangeSource = item => {
         //alert(JSON.stringify(item));
@@ -78,8 +87,11 @@ const TripSelector = ({ selected_trip }) => {
         }),
     };    
 
+    // console.log(`Return Date => ${return_date}`);
+    // console.log(`TripType => ${trip_type} | ${trip_type === 'Roundtrip'}`);
+
     return (
-        <div className="">
+        <div className="search-control-group">
             <Row>
                 <Col xs="12" sm="12" md={{size: 6}}>
                     <label className="form-label">
@@ -123,6 +135,22 @@ const TripSelector = ({ selected_trip }) => {
                         options={data}
                     />
                 </Col>                
+            </Row>
+            <Row>
+                <Col xs="12" sm="12" md={{size: 6}}>
+                    <label className="form-label">
+                        Departure Date :
+                    </label>
+                    <Datetime className="datetime-picker-control" dateFormat="YYYY-MM-DD" timeFormat={false} closeOnSelect={true} closeOnTab={true} />
+                </Col>
+                {showReturnDate && (
+                <Col xs="12" sm="12" md={{size: 6}} >
+                    <label className="form-label">
+                        Return Date :
+                    </label>
+                    <Datetime className="datetime-picker-control" dateFormat="YYYY-MM-DD" timeFormat={false} closeOnSelect={true} closeOnTab={true}/>
+                </Col>
+                )}
             </Row>
         </div>
     );
