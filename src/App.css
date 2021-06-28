@@ -332,9 +332,11 @@ body::after {
   }
   
   #search-panel {
-    width: 460px; /*350px;*/
-    position: fixed;
-    position: -webkit-fixed;
+    width: 100%; /* 460px; */ /*350px;*/
+    /*position: fixed;*/
+    position: sticky;
+    position: -webkit-sticky;
+    top: 9%;
     /*height: 100vh;
     scroll-behavior: smooth;
     overflow-y: scroll; */
@@ -636,6 +638,7 @@ h3.title {
 }
 .option-item-text {
   font-size: .8em;
+  color: #fff;
 }
 .datetime-picker-control > input {
   height: 25px;
@@ -673,4 +676,51 @@ h3.title {
 }
 .rdtPicker th.rdtSwitch {
   font-size: 13px;
+}
+.themed-container {
+  width: 85% !important;
+}
+.trip-selector {
+  width: 100%;
+  margin: 10px 0;
+  padding: 0px;
+  line-height: 16px;
+  background-color: transparent;
+  float: left;
+  border-radius: 3px 3px 0 0;
+  clear: both;
+  font-size: smaller;
+}
+.trip-selector ul li:first-child {
+  margin-left: 0;
+}
+.trip-selector ul li {
+  float: left;
+  margin: 5px 5px 3px 0px;
+}
+.trip-selector ul li a {
+  font-size: .71429em;
+  border-radius: 4px;
+  color: #666;
+  padding: 7px 23px;
+  border: 1px solid #e4e4e4;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.trip-selector ul li a:hover {
+  text-decoration: none;
+  background-color: #2a52d6;
+  color: #fff !important;  
+}
+a.active-item {
+  border: 1px solid #ff0000 !important;
+}
+.triptype-item {
+
+}
+ol ul {
+  list-style: none;
+}
+li {
+  list-style: none;
 }

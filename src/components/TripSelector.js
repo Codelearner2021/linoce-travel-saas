@@ -20,7 +20,7 @@ var data = [
 ];
 
 
-const TripSelector = ({ selected_trip, trip_type }) => {
+const TripSelector = ({ selected_trip, trip_type, cities, airlines }) => {
     const { source_city, destination_city, departure_date, return_date, traveller_choice } = selected_trip;
     const [sourceCity, setSourceCity] = useState('');
     const [destinationCity, setDestinationCity] = useState('');
@@ -100,7 +100,7 @@ const TripSelector = ({ selected_trip, trip_type }) => {
                     <Select
                         styles={styles}
                         classNamePrefix="select"
-                        defaultValue={`<span className="option-item-text">${data[0].name} [${data[0].code}]</span>`}
+                        defaultValue={`<span className="option-item-text">${(cities && cities.length>0)? cities[0].name : ''}</span>`}
                         isDisabled={false}
                         isLoading={false}
                         isClearable={false}
@@ -108,10 +108,10 @@ const TripSelector = ({ selected_trip, trip_type }) => {
                         isSearchable={true}
                         onChange={onChangeSource}
                         name="color"
-                        getOptionLabel={option => `${option.name} [${option.code}]`}
+                        getOptionLabel={option => `${option.name}`}
                         getOptionValue={option => `${option}`}
                         isOptionSelected={option => sourceCity.id == option.id}
-                        options={data}
+                        options={cities}
                     />
                 </Col>
                 <Col xs="12" sm="12" md={{size: 6}}>
@@ -121,7 +121,7 @@ const TripSelector = ({ selected_trip, trip_type }) => {
                     <Select
                         styles={styles}
                         classNamePrefix="select"
-                        defaultValue={`<span className="option-item-text">${data[0].name} [${data[0].code}]</span>`}
+                        defaultValue={`<span className="option-item-text">${(cities && cities.length>0)? cities[0].name : ''}</span>`}
                         isDisabled={false}
                         isLoading={false}
                         isClearable={false}
@@ -129,12 +129,12 @@ const TripSelector = ({ selected_trip, trip_type }) => {
                         isSearchable={true}
                         onChange={onChangeDestination}
                         name="color"
-                        getOptionLabel={option => `${option.name} [${option.code}]`}
+                        getOptionLabel={option => `${option.name}`}
                         getOptionValue={option => `${option}`}
                         isOptionSelected={option => destinationCity.id == option.id}
-                        options={data}
+                        options={cities}
                     />
-                </Col>                
+                </Col>
             </Row>
             <Row>
                 <Col xs="12" sm="12" md={{size: 6}}>
@@ -157,4 +157,4 @@ const TripSelector = ({ selected_trip, trip_type }) => {
 };
 
 //export default TripSelector;
-export default inject("CompanyStore")(withRouter(observer(TripSelector)));
+export default inject("CommonStore", "CompanyStore", "UserStore")(withRouter(observer(TripSelector)));

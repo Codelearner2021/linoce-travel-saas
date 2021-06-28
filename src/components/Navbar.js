@@ -92,7 +92,7 @@ class NavbarMain extends React.Component {
           fixed={`top`}
           className="navDark"
         >
-          <Container>
+          <Container className="themed-container" fluid={true}>
             <NavbarBrand href="/#">
               <span>
                 {this.props.CompanyStore.Company.displayName ? this.props.CompanyStore.Company.displayName : ''}

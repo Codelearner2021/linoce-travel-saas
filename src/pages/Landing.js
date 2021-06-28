@@ -31,13 +31,13 @@ class Landing extends Component {
     render() {
         return (
             <div id='landing'>
-                <Container>
+                <Container className="themed-container" fluid={true}>
                     <Row>
                         {/*Search functions - Flights, Hotels, Bus, Cars etc.*/}
-                        <Col xs="12" sm="12" md={{size: 5}}>
+                        <Col xs="12" sm="12" md={{size: 4}}>
                             <SearchPanel />
                         </Col>
-                        <Col xs="12" sm="12" md={{size: 7}}>
+                        <Col xs="12" sm="12" md={{size: 8}}>
                             <Row>
                                 <Col xs="12" sm="12">
                                     <div className="landing-content">

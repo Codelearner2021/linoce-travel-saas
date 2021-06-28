@@ -20,7 +20,9 @@ class SearchPanel extends Component {
             activeTab: '1',
             trip_type: 'Oneway',
             selected_trip: {'source_city': {id: 1, name: "Kolkata", code: "CCU", enable: true}, 'destination_city': {id: 1, name: "Mumbai", code: "MUM", enable: true}, 
-            'departure_date': new Date('2021-06-30'), 'return_date': null, 'traveller_choice': {'adult': 1, 'child': 0, 'infant': 0, 'class': 'Economy'}}
+            'departure_date': new Date('2021-06-30'), 'return_date': null, 'traveller_choice': {'adult': 1, 'child': 0, 'infant': 0, 'class': 'Economy'}},
+            cities: [],
+            airlines: []
         };
     }
 
@@ -29,35 +31,41 @@ class SearchPanel extends Component {
             this.setState({
                 activeTab: tab,
                 trip_type: 'Oneway',
-                selected_trip: this.state.selected_trip
+                selected_trip: this.state.selected_trip,
+                cities: this.props.CommonStore.Common.cities,
+                airlines: this.props.CommonStore.Common.airlines
             });
         }
     }  
 
-    onChangeTripType(event) {
-        console.log(event.target.value);
+    onChangeTripType(triptype) {
+        //console.log(event.target.value);
         var selected_trip = {};
 
-        if(event.target.value === 'Oneway') {
+        if(triptype === 'Oneway') {
             selected_trip = {'source_city': {id: 1, name: "Kolkata", code: "CCU", enable: true}, 'destination_city': {id: 1, name: "Mumbai", code: "MUM", enable: true}, 
             'departure_date': new Date('2021-06-30'), 'return_date': null, 'traveller_choice': {'adult': 1, 'child': 0, 'infant': 0, 'class': 'Economy'}};
             this.setState({
                 activeTab: this.state.activeTab,
-                trip_type: event.target.value,
-                selected_trip
+                trip_type: triptype,
+                selected_trip,
+                cities: this.props.CommonStore.Common.cities,
+                airlines: this.props.CommonStore.Common.airlines
             });
 
 
             //console.log('OW Value => ' + JSON.stringify(this.state.selected_trip));
         }
-        else if(event.target.value === 'Roundtrip') {
+        else if(triptype === 'Roundtrip') {
             selected_trip = {'source_city': {id: 1, name: "Kolkata", code: "CCU", enable: true}, 'destination_city': {id: 1, name: "Mumbai", code: "MUM", enable: true}, 
             'departure_date': new Date('2021-06-30'), 'return_date': new Date('2021-07-05'), 'traveller_choice': {'adult': 1, 'child': 0, 'infant': 0, 'class': 'Economy'}};
             //console.log('Before RT Value => ' + JSON.stringify(this.state.selected_trip));
             this.setState({
                 activeTab: this.state.activeTab,
-                trip_type: event.target.value,
-                selected_trip
+                trip_type: triptype,
+                selected_trip,
+                cities: this.props.CommonStore.Common.cities,
+                airlines: this.props.CommonStore.Common.airlines
             });
             //console.log('RT Value => ' + JSON.stringify(this.state.selected_trip));
         }
@@ -97,13 +105,21 @@ class SearchPanel extends Component {
                                     <Col sm="12">
                                         <Row>
                                             <Col sm="12">
-                                                <div onChange={this.onChangeTripType} className="trip-selector">
-                                                    <input type="radio" value="Oneway" name="triptype" defaultChecked/> Oneway
-                                                    <input type="radio" value="Roundtrip" name="triptype"/> Roundtrip
+                                                <div className="trip-selector">
+                                                    <ul>
+                                                        <li>
+                                                            <a href="javascript:void(0);" title="Oneway" onClick={() => { this.onChangeTripType('Oneway'); }} className={this.state.trip_type=='Oneway' ? "triptype-item active-item" : "triptype-item"}>Oneway</a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="javascript:void(0);" title="Roundtrip" onClick={() => { this.onChangeTripType('Roundtrip'); }} className={this.state.trip_type=='Roundtrip' ? "triptype-item active-item" : "triptype-item"}>Roundtrip</a>
+                                                        </li>
+                                                    </ul>
+                                                    {/* <input type="radio" value="Oneway" name="triptype" defaultChecked/> Oneway
+                                                    <input type="radio" value="Roundtrip" name="triptype"/> Roundtrip */}
                                                 </div>
                                             </Col>
                                         </Row>
-                                        <TripSelector selected_trip={this.state.selected_trip} trip_type={this.state.trip_type}/>
+                                        <TripSelector selected_trip={this.state.selected_trip} trip_type={this.state.trip_type} cities={this.props.CommonStore.Common.cities} airlines={this.props.CommonStore.Common.airlines}/>
                                     </Col>
                                 </Row>
                             </TabPane>
@@ -111,7 +127,8 @@ class SearchPanel extends Component {
                                 <Row>
                                     <Col sm="12">
                                         <TripSelector selected_trip={{'source_city': {id: 1, name: "Kolkata", code: "CCU", enable: true}, 'destination_city': {id: 1, name: "Mumbai", code: "MUM", enable: true}, 
-                                            'departure_date': new Date('2021-06-30'), 'return_date': new Date('2021-07-05'), 'traveller_choice': {'adult': 1, 'child': 0, 'infant': 0, 'class': 'Economy'}}} trip_type={this.state.trip_type}/>
+                                            'departure_date': new Date('2021-06-30'), 'return_date': new Date('2021-07-05'), 'traveller_choice': {'adult': 1, 'child': 0, 'infant': 0, 'class': 'Economy'}}} trip_type={this.state.trip_type}
+                                            cities={this.props.CommonStore.Common.cities} airlines={this.props.CommonStore.Common.airlines} />
                                     </Col>
                                 </Row>
                             </TabPane>
@@ -146,4 +163,4 @@ class SearchPanel extends Component {
 }
 
 //export default Hero;
-export default inject("CompanyStore", "UserStore")(withRouter(observer(SearchPanel)));
+export default inject("CommonStore", "CompanyStore", "UserStore")(withRouter(observer(SearchPanel)));

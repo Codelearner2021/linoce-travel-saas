@@ -78,6 +78,14 @@ class App extends Component {
     const dns = window.location.hostname;
     const href = window.location.href;
 
+    var cities = this.props.CommonStore.getCities()
+        .then(response => {
+          console.log(response);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+
     var result = this.props.CompanyStore.getCompanyByUrl(dns)
         .then(response => {
           console.log(JSON.stringify(response));
@@ -148,4 +156,4 @@ class App extends Component {
   }
 }
 
-export default inject("CompanyStore", "UserStore")(observer(App));
+export default inject("CommonStore", "CompanyStore", "UserStore")(observer(App));

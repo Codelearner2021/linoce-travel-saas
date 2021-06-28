@@ -9,6 +9,7 @@ import { Provider } from 'mobx-react';
 
 import companyStoreInstance from './stores/CompanyStore';
 import userStoreInstance from './stores/UserStore';
+import commonStoreInstance from './stores/CommonStore';
 
 import "bootstrap/dist/css/bootstrap.css";
 // Add custom css import below this line
@@ -19,7 +20,9 @@ const history = createBrowserHistory();
 export const StoreContext = React.createContext();
 
 ReactDOM.render(
-    <Provider CompanyStore={companyStoreInstance} UserStore={userStoreInstance}>
+    <Provider CompanyStore={companyStoreInstance} 
+        UserStore={userStoreInstance} 
+        CommonStore={commonStoreInstance}>
         <Router history={history}>
             <App />
         </Router>
