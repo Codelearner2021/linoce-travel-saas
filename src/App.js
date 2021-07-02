@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import { observer, inject } from 'mobx-react';
 
 import "./App.css";
@@ -13,6 +14,7 @@ import Tour from "./pages/Tour";
 import Authorization from "./pages/Authorization";
 import axios from 'axios';
 import ErrorPage from "./components/ErrorPage";
+import { Alert } from 'reactstrap';
 
 require('dotenv').config();
 
@@ -24,8 +26,9 @@ class App extends Component {
       error: -1,
       company: {'displayName' : ''}
     };
-  }
 
+    this.onDismiss = this.onDismiss.bind(this);
+  }
 
 //   componentDidMount() {
 //     const dns = window.location.hostname;
@@ -110,50 +113,55 @@ class App extends Component {
         .catch(error => {
           console.log('There is an error! ', error);
         });
+  }
 
-    //console.log(JSON.stringify(result));
-
-    // if(company) {
-    //   console.log(`${company.name} - ${company.id}`);
-    //   if(company.active) {
-    //     this.setState({error: -1, company});
-    //   }
-    //   else {
-    //     this.setState({error: 1, company: null});
-    //   }
-    // }
-    // else {
-    //   this.setState({error: 1, company: null});
-    // }    
+  onDismiss(ev) {
+    this.props.CommonStore.toggleAlert(false);
   }
 
   render() {
+    const AlertControl = ({title, msg, visible, onToggle, isErrorAlert}) => (
+      <div className="themed-container container-fluid">
+        <div className="alert-container">
+          <Alert color={isErrorAlert ? "danger" : "success"} isOpen={visible} toggle={onToggle} fade={true}>
+              <h4 className="alert-heading">{title}</h4>
+              <p>{msg}</p>
+          </Alert>
+        </div>
+      </div>
+    )
+
     if(this.state.error === 1) {
       return (
         <div className="App"><ErrorPage /></div>
       );
     }
-    return (
-      <div className="App">
-        <NavbarMain />
-        <Route exact path="/">
-          {/* <Home/> */}
-          <Landing/>
-        </Route>
-        <Route exact path="/tour">
-          <Tour/>
-        </Route>
-        <Route exact path="/auth">
-          <Authorization/>
-        </Route>
-        {/* <Router>
-          <Home path="/" />
-          <Tour path="tour" />
-          <Login path="login" />
-        </Router> */}
-      </div>
-    );
+    else {
+      return (
+        <div className="App">
+          <NavbarMain />
+          <AlertControl title={this.props.CommonStore.Alert.title} msg={this.props.CommonStore.Alert.message} visible={this.props.CommonStore.Alert.visible} onToggle={this.onDismiss} isErrorAlert={this.props.CommonStore.Alert.isError} />
+          {/* <AlertControl title="Testing header" msg="Testing message" visible={true} onToggle={this.onDismiss} isErrorAlert={false} /> */}
+          <Route exact path="/">
+            {/* <Home/> */}
+            <Landing/>
+          </Route>
+          <Route exact path="/tour">
+            <Tour/>
+          </Route>
+          <Route exact path="/auth">
+            <Authorization/>
+          </Route>
+          {/* <Router>
+            <Home path="/" />
+            <Tour path="tour" />
+            <Login path="login" />
+          </Router> */}
+        </div>
+      );
+    }
   }
 }
 
-export default inject("CommonStore", "CompanyStore", "UserStore")(observer(App));
+//export default inject("CommonStore", "CompanyStore", "UserStore")(observer(App));
+export default inject("CommonStore", "CompanyStore", "UserStore")(withRouter(observer(App)));

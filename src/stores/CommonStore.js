@@ -16,6 +16,13 @@ export class Common {
 
 class CommonStore {
     Common = {};
+    Alert = {
+        title: '',
+        message: '',
+        visible: false,
+        isError: false
+    }
+
     LoggedInUser = {
         user: {},
         jwt: {
@@ -87,6 +94,17 @@ class CommonStore {
         if(result && result.data) {
             console.log(JSON.stringify(result.data));
         }
+    }
+
+    async setAlert(title, message, visible=false, isError=false) {
+        this.Alert.isError = isError;
+        this.Alert.title = title;
+        this.Alert.message = message;
+        this.Alert.visible = visible;
+    }
+
+    async toggleAlert(show=false) {
+        this.Alert.visible = show;
     }
 };
 

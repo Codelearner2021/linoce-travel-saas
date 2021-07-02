@@ -14,7 +14,6 @@ class SearchPanel extends Component {
         //console.log(`Display Name : ${store.Company.displayName}`)
 
         this.toggle = this.toggle.bind(this);
-        this.onChangeTripType = this.onChangeTripType.bind(this);
 
         this.state = {
             activeTab: '1',
@@ -103,22 +102,6 @@ class SearchPanel extends Component {
                             <TabPane tabId="1">
                                 <Row>
                                     <Col sm="12">
-                                        <Row>
-                                            <Col sm="12">
-                                                <div className="trip-selector">
-                                                    <ul>
-                                                        <li>
-                                                            <a href="javascript:void(0);" title="Oneway" onClick={() => { this.onChangeTripType('Oneway'); }} className={this.state.trip_type=='Oneway' ? "triptype-item active-item" : "triptype-item"}>Oneway</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="javascript:void(0);" title="Roundtrip" onClick={() => { this.onChangeTripType('Roundtrip'); }} className={this.state.trip_type=='Roundtrip' ? "triptype-item active-item" : "triptype-item"}>Roundtrip</a>
-                                                        </li>
-                                                    </ul>
-                                                    {/* <input type="radio" value="Oneway" name="triptype" defaultChecked/> Oneway
-                                                    <input type="radio" value="Roundtrip" name="triptype"/> Roundtrip */}
-                                                </div>
-                                            </Col>
-                                        </Row>
                                         <TripSelector selected_trip={this.state.selected_trip} trip_type={this.state.trip_type} cities={this.props.CommonStore.Common.cities} airlines={this.props.CommonStore.Common.airlines}/>
                                     </Col>
                                 </Row>

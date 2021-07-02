@@ -8,6 +8,7 @@
     "axios": "^0.21.1",
     "bootstrap": "^4.5.2",
     "dotenv": "^6.0.0",
+    "font-awesome": "^4.7.0",
     "history": "^4.10.1",
     "mobx": "^6.3.2",
     "mobx-react": "^7.2.0",

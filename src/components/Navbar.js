@@ -45,7 +45,14 @@ class NavbarMain extends React.Component {
   handleLogoutClick = async (e) => {
     e.preventDefault();
     await this.props.CompanyStore.logout();
-  }
+
+    this.props.CommonStore.setAlert('Confirmation', 'You have been successfully logged out. Come back soon!', true, false);
+
+    setTimeout(() => {
+      if(this.props.CommonStore.Alert.visible)
+        this.props.CommonStore.toggleAlert(false);
+    }, 3000, this);
+}
 
   handleClick = (e) => {
     e.preventDefault();
@@ -144,4 +151,4 @@ class NavbarMain extends React.Component {
 //inject("CompanyStore")(observer(App));
 
 //export default withRouter(NavbarMain);
-export default inject("CompanyStore", "UserStore")(withRouter(observer(NavbarMain)));
+export default inject("CommonStore", "CompanyStore", "UserStore")(withRouter(observer(NavbarMain)));

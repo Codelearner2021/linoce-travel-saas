@@ -5,6 +5,8 @@ import { withRouter } from "react-router-dom";
 import { observer, inject } from 'mobx-react';
 import Datetime from 'react-datetime';
 import "react-datetime/css/react-datetime.css";
+import FlightTripChoice from "./FlightTripChoice";
+import PaxInfo from "./PaxInfo";
 
 import "../App.css";
 
@@ -25,9 +27,10 @@ const TripSelector = ({ selected_trip, trip_type, cities, airlines }) => {
     const [sourceCity, setSourceCity] = useState('');
     const [destinationCity, setDestinationCity] = useState('');
     const [showReturnDate, setShowReturnDate] = useState(false);
+    const [tripType, setTripType] = useState(trip_type);
 
     useEffect(() => {
-        setShowReturnDate(trip_type === 'Roundtrip');
+        setShowReturnDate(tripType === 'Roundtrip');
     });
 
     const onChangeSource = item => {
@@ -38,6 +41,13 @@ const TripSelector = ({ selected_trip, trip_type, cities, airlines }) => {
     const onChangeDestination = item => {
         //alert(JSON.stringify(item));
         setDestinationCity(item);
+    }
+
+    const onTripChange = trip_type => {
+        //alert(`trip_type => ${trip_type}`)
+        setTripType(trip_type);
+        console.log(`Result -> ${trip_type === 'Roundtrip'}`);
+        setShowReturnDate(trip_type === 'Roundtrip');
     }
 
     const styles = {
@@ -93,6 +103,11 @@ const TripSelector = ({ selected_trip, trip_type, cities, airlines }) => {
     return (
         <div className="search-control-group">
             <Row>
+                <Col xs="12" sm="12" md={{size: 12}}>
+                    <FlightTripChoice selected_trip={selected_trip} trip_type={tripType} cities={cities} airlines={airlines} onTripChange={onTripChange} />
+                </Col>
+            </Row>
+            <Row>
                 <Col xs="12" sm="12" md={{size: 6}}>
                     <label className="form-label">
                         Departure :
@@ -105,7 +120,7 @@ const TripSelector = ({ selected_trip, trip_type, cities, airlines }) => {
                         isLoading={false}
                         isClearable={false}
                         isRtl={false}
-                        isSearchable={true}
+                        isSearchable={false}
                         onChange={onChangeSource}
                         name="color"
                         getOptionLabel={option => `${option.name}`}
@@ -126,7 +141,7 @@ const TripSelector = ({ selected_trip, trip_type, cities, airlines }) => {
                         isLoading={false}
                         isClearable={false}
                         isRtl={false}
-                        isSearchable={true}
+                        isSearchable={false}
                         onChange={onChangeDestination}
                         name="color"
                         getOptionLabel={option => `${option.name}`}
@@ -143,6 +158,7 @@ const TripSelector = ({ selected_trip, trip_type, cities, airlines }) => {
                     </label>
                     <Datetime className="datetime-picker-control" dateFormat="YYYY-MM-DD" timeFormat={false} closeOnSelect={true} closeOnTab={true} />
                 </Col>
+                {console.log(`showReturnDate => ${showReturnDate}`)}
                 {showReturnDate && (
                 <Col xs="12" sm="12" md={{size: 6}} >
                     <label className="form-label">
@@ -151,6 +167,11 @@ const TripSelector = ({ selected_trip, trip_type, cities, airlines }) => {
                     <Datetime className="datetime-picker-control" dateFormat="YYYY-MM-DD" timeFormat={false} closeOnSelect={true} closeOnTab={true}/>
                 </Col>
                 )}
+            </Row>
+            <Row>
+                <Col xs="12" sm="12" md={{size: 12}}>
+                    <PaxInfo></PaxInfo>
+                </Col>
             </Row>
         </div>
     );
