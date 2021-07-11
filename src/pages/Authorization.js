@@ -67,4 +67,4 @@ class Authorization extends Component {
   }
 }
 
-export default inject("CompanyStore", "UserStore")(withRouter(observer(Authorization)));
+export default inject("CommonStore", "CompanyStore", "UserStore")(withRouter(observer(Authorization)));

@@ -3,6 +3,8 @@ import CompanyService from '../services/CompanyService';
 import UserService from '../services/UserService';
 import CommonService from '../services/CommonService';
 
+const ALERT_TIMEOUT = 3000;
+
 export class Common {
     cities = [];
     airlines = [];
@@ -101,6 +103,13 @@ class CommonStore {
         this.Alert.title = title;
         this.Alert.message = message;
         this.Alert.visible = visible;
+
+        if(visible) {
+            setTimeout(() => {
+                if(this.Alert.visible)
+                    this.toggleAlert(false);
+            }, ALERT_TIMEOUT);
+        }
     }
 
     async toggleAlert(show=false) {

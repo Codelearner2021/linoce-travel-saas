@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import Tour from "./pages/Tour";
 import Authorization from "./pages/Authorization";
+import FlightSearch from "./pages/FlightSearch";
 import axios from 'axios';
 import ErrorPage from "./components/ErrorPage";
 import { Alert } from 'reactstrap';
@@ -151,6 +152,9 @@ class App extends Component {
           </Route>
           <Route exact path="/auth">
             <Authorization/>
+          </Route>
+          <Route exact path="/flight-search">
+            <FlightSearch/>
           </Route>
           {/* <Router>
             <Home path="/" />

@@ -111,7 +111,7 @@ class Landing extends Component {
                         </Col>
                     </Row>
                 </Container>
-        </div>
+            </div>
         );
     }
 }

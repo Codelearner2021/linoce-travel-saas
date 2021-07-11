@@ -14,9 +14,9 @@ import "../App.css";
 
 var moment = require('moment');
 
-const PaxInfo = ({CommonStore}) => {
+const PaxInfo = ({CommonStore, onPaxInfoChange}) => {
     // const { source_city, destination_city, departure_date, return_date, traveller_choice } = selected_trip;
-    const [sourceCity, setSourceCity] = useState('');
+    // const [sourceCity, setSourceCity] = useState('');
     const [adult, setAdult] = useState(0);
     const [child, setChild] = useState(0);
     const [infant, setInfant] = useState(0);
@@ -33,6 +33,9 @@ const PaxInfo = ({CommonStore}) => {
 
     const onSelectionChange = item => {
         setFlightClass(item);
+
+        let paxInfo = {'class': item, adult, child, infant }
+        onPaxInfoChange(paxInfo);
     };
 
     const ExpansionIcon = () => ({
@@ -44,13 +47,26 @@ const PaxInfo = ({CommonStore}) => {
         setIsCollapsed(!isCollapsed);
     }
 
-    const doSearchFlight = ev => {
-        CommonStore.setAlert('Confirmation', 'Search flight feature is in development. Soon it will be available. Keep visiting', true, false);
+    const onPaxChange = (paxtype, value) => {
+        let paxInfo = {'class': flightClass, adult, child, infant }
+        switch (paxtype) {
+            case 'adult':
+                setAdult(value);
+                paxInfo.adult = value;
+                break;
+            case 'child':
+                setChild(value);
+                paxInfo.child = value;
+                break;
+            case 'infant':
+                setInfant(value);
+                paxInfo.infant = value;
+                break;
+            default:
+                break;
+        }
 
-        setTimeout(() => {
-            if(CommonStore.Alert.visible)
-                CommonStore.toggleAlert(false);
-        }, 3000);
+        onPaxInfoChange(paxInfo);
     }
 
     return (
@@ -68,16 +84,13 @@ const PaxInfo = ({CommonStore}) => {
                 </div>
                 <div className={isCollapsed ? "pax-selection-container transform container-collapse" : "pax-selection-container transform"}>
                     <div id="passenger-box" className="flight-passenger-box dflex">
-                        <NumberSelector id="adult_count" selector_name="Adult" maxValue={9} numberValue={0} onValueChange={(value) => setAdult(value)}/>
-                        <NumberSelector id="child_count" selector_name="Child" maxValue={5} numberValue={0} onValueChange={(value) => setChild(value)}/>
-                        <NumberSelector id="infant_count" selector_name="Infant" maxValue={5} numberValue={0} onValueChange={(value) => setInfant(value)}/>
+                        <NumberSelector id="adult_count" selector_name="Adult" maxValue={9} numberValue={0} onValueChange={(value) => onPaxChange('adult', value)}/>
+                        <NumberSelector id="child_count" selector_name="Child" maxValue={5} numberValue={0} onValueChange={(value) => onPaxChange('child', value)}/>
+                        <NumberSelector id="infant_count" selector_name="Infant" maxValue={5} numberValue={0} onValueChange={(value) => onPaxChange('infant', value)}/>
                     </div>
 
                     <OptionSelectorGroup options={["Economy", "Premium Economy", "Business"]} defaultSelectedIndex={0} onSelectionChange={(ev) => onSelectionChange(ev)} isMultiSelect={false}/>
                 </div>
-            </div>
-            <div className="action-section">
-                <Button outline color="primary" onClick={(ev) => doSearchFlight()}> Search <i className="fa fa-arrow-right" aria-hidden="true"></i></Button>
             </div>
         </div>
     );

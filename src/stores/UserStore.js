@@ -49,6 +49,11 @@ export class User {
 
 class UserStore {
     User = {};
+    SearchResult_Flights = {
+        payload: {},
+        processing: false,
+        result: []
+    };
 
     constructor() {
         this.userService = new UserService();
@@ -83,6 +88,41 @@ class UserStore {
         else {
             return result;
         }
+    }
+
+    async searchMyFlights(searchPayload) {
+        let token = localStorage.getItem('token');
+        if(!token) return null;
+
+        this.SearchResult_Flights.payload = searchPayload;
+        this.SearchResult_Flights.processing = true;
+
+        console.log(JSON.stringify(searchPayload));
+        var result = await this.userService.useToken(token).searchMyFlights(searchPayload);
+
+        console.log(JSON.stringify(result));
+        if(result && result.data) {
+            console.log(JSON.stringify(result.data));
+            runInAction(() => {
+                let flights = result.data;
+                //this.SearchResult_Flights = flights;
+                this.SearchResult_Flights.result = flights;
+                this.SearchResult_Flights.processing = false;
+
+                console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights)}`);
+            });
+
+            return result.data;
+        }
+        else {
+            return result;
+        }
+    }
+
+    isLoggedIn() {
+        let token = localStorage.getItem('token');
+        //if(!token) return null;
+        return token !== null;
     }
 };
 
