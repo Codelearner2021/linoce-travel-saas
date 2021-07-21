@@ -308,6 +308,12 @@ body::after {
   margin-top: 80px;
 }
 
+@media screen and (max-width: 985px) {
+  #landing {
+    margin-top: 60px;
+  }
+}
+
 .landing-content {
   background: #ffffff;
   margin: 10px 0px;
@@ -625,6 +631,15 @@ h3.title {
   display: inline-block;
   margin: 0px 5px 0px 10px;
   color: #20e6ab;  
+}
+
+@media screen and (max-width: 985px) {
+  .navbar-brand {
+    font-size: 1em !important;
+  }
+  /* .logged-in-user   {
+    font-size: .7em;
+  } */
 }
 
 .error {
@@ -945,6 +960,12 @@ button:disabled, button[disabled]{
   border-top-right-radius: 5px;  
 }
 
+@media screen and (max-width: 985px) {
+  .search-header-section {
+    margin-top: 0px;
+  }
+}
+
 .search-item {
   background-color: var(--primary-background);
   padding: 12px 5px 0px;
@@ -975,6 +996,7 @@ button:disabled, button[disabled]{
   font-weight: 400;
   position: relative;
   overflow-x: hidden;  
+  min-height: 250px;
 }
 
 .search-button-filter {
@@ -987,6 +1009,12 @@ button:disabled, button[disabled]{
   font-size: 16px;
   line-height: 0;
   font-weight: 500;
+}
+
+@media screen and (max-width: 985px) {
+  .search-button-filter {
+    font-size: 12px;
+  }
 }
 
 .search-activefilter {
@@ -1103,6 +1131,9 @@ input[type=checkbox], input[type=radio] {
   box-sizing: border-box;
   padding: 0;
 }
+.atls-holdid {
+  margin-top: 5px;
+}
 .ars-radiolist li {
   /* position: relative; */
   border-bottom: 1px solid #e5e5e5;
@@ -1176,10 +1207,83 @@ input[type=radio]:checked ~ .check::before {
   display: inherit;
   margin-top: 0px;
 }
+.label-Retail {
+  background: #fbd4ffa3;
+  color: #ff1da8;
+  border-radius: 0;
+  padding: 0px;
+  display: inherit;
+  margin-top: 0px;
+} 
+
+.label-Coupon {
+  background: #c9c3ffa3;
+  color: #341dff;
+  border-radius: 0;
+  padding: 0px;
+  display: inherit;
+  margin-top: 0px;
+} 
+
+.label-Special {
+  background: #c3ffc5a3;
+  color: #1dff1d;
+  border-radius: 0;
+  padding: 0px;
+  display: inherit;
+  margin-top: 0px;
+} 
+
+.label-Spl-Coupon {
+  background: #c3fbffa3;
+  color: #1de5ff;
+  border-radius: 0;
+  padding: 0px;
+  display: inherit;
+  margin-top: 0px;
+} 
+
+.label-WebSpl {
+  background: #fffdc3a3;
+  color: #ffdd1d;
+  border-radius: 0;
+  padding: 0px;
+  display: inherit;
+  margin-top: 0px;
+} 
+
+.label-Offer {
+  background: #ffe5c3a3;
+  color: #ff7f1d;
+  border-radius: 0;
+  padding: 0px;
+  display: inherit;
+  margin-top: 0px;
+} 
+
+.label-Private {
+  background: #99bcf159;
+  color: #28128a;
+  border-radius: 0;
+  padding: 0px;
+  display: inherit;
+  margin-top: 0px;
+} 
+
+.label-NA {
+  background: #ffccc3a3;
+  color: #ff3f1d;
+  border-radius: 0;
+  padding: 0px;
+  display: inherit;
+  margin-top: 0px;
+} 
+
 .ars-flightlabel {
   float: left;
   min-width: 40px;
   font-size: 10px;
+  text-align: center;
 }
 .atls-holder {
   /* position: relative; */
@@ -1243,4 +1347,15 @@ input[type=radio]:checked ~ .check::before {
 }
 .expanded-flight-list .exp-icon {
   transform: rotate(-90deg);  
+}
+.flightrightview button {
+  float: right;
+  margin-bottom: 10px;
+}
+.process-status {
+  font-size: 1.2em;
+  color: #fff;
+  position: absolute;
+  top: 50%;
+  left: 3%;  
 }

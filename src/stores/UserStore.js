@@ -94,29 +94,94 @@ class UserStore {
         let token = localStorage.getItem('token');
         if(!token) return null;
 
-        this.SearchResult_Flights.payload = searchPayload;
-        this.SearchResult_Flights.processing = true;
+        runInAction(() => {
+            this.SearchResult_Flights.processing = true;
+            this.SearchResult_Flights.payload = searchPayload;
+        });
 
-        console.log(JSON.stringify(searchPayload));
-        var result = await this.userService.useToken(token).searchMyFlights(searchPayload);
+        return new Promise(async (resolve, reject) => {
+            try
+            {
+                //console.log(JSON.stringify(searchPayload));
+                var result = await this.userService.useToken(token).searchMyFlights(searchPayload);
+        
+                //console.log(JSON.stringify(result));
+                if(result && result.data) {
+                    //console.log(JSON.stringify(result.data));
+                    runInAction(() => {
+                        let flights =  result.data.searchedFlights || []; //result.data;
+                        let dataLength = flights.length;
+                        let rowsCount = result.data.totalCount;
+                        //this.SearchResult_Flights = flights;
+                        this.SearchResult_Flights.result = flights;
+                        this.SearchResult_Flights.processing = flights.length>0 && (rowsCount !== flights.length);
+        
+                        //console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights)}`);
+                    });
+        
+                    if(this.SearchResult_Flights.processing) {
+                        await this.getRemainingFlights(result.data);
+                    }
+                    resolve(result.data);
+                }
+                else {
+                    resolve(result);
+                }
+            }
+            catch(ex) {
+                console.log(`Error in searchMyFlights => ${ex}`);
+                reject(ex);
+            }
+        });
+    }
 
-        console.log(JSON.stringify(result));
-        if(result && result.data) {
-            console.log(JSON.stringify(result.data));
-            runInAction(() => {
-                let flights = result.data;
-                //this.SearchResult_Flights = flights;
-                this.SearchResult_Flights.result = flights;
-                this.SearchResult_Flights.processing = false;
+    async getRemainingFlights(flightResult) { 
+        let token = localStorage.getItem('token');
+        if(!token) return null;
 
-                console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights)}`);
-            });
+        return new Promise(async (resolve, reject) => {
+            try
+            {
+                var cacheKey = flightResult.traceId;
+                var pageSize = parseInt(flightResult.pageSize, 10);
+                var pageIndex = parseInt(flightResult.pageIndex, 10) + 1;
+                //console.log(JSON.stringify(searchPayload));
+                var result = await this.userService.useToken(token).searchPagedMyFlights(cacheKey, pageSize, pageIndex);
+        
+                //console.log(JSON.stringify(result));
+                if(result && result.data) {
+                    runInAction(() => {
+                        // let flights = this.SearchResult_Flights.result;
+                        let flights =  result.data.searchedFlights; //result.data;
+                        
+                        // flights.push(newFlights);
 
-            return result.data;
-        }
-        else {
-            return result;
-        }
+                        let dataLength = flights ? flights.length : 0;
+                        let rowsCount = result.data.totalCount;
+                        //this.SearchResult_Flights = flights;
+                        if(flights) {
+                            //this.SearchResult_Flights.result.push(flights);
+                            this.SearchResult_Flights.result = this.SearchResult_Flights.result.concat(flights);
+                            this.SearchResult_Flights.processing = flights.length>0;
+                        }
+                        else {
+                            this.SearchResult_Flights.processing = false;
+                        }
+        
+                        console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights.result)}`);
+                    });
+        
+                    if(this.SearchResult_Flights.processing) {
+                        await this.getRemainingFlights({'traceId': cacheKey, 'pageSize': pageSize, 'pageIndex': pageIndex});
+                    }
+                    resolve(result.data);
+                }
+            }
+            catch(ex) {
+                console.log(`Error in getRemainingFlights => ${ex}`);
+                reject(ex);
+            }
+        });
     }
 
     isLoggedIn() {

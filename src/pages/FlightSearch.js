@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Container, TabContent, TabPane, Nav, NavItem, NavLink, Card, CardImg, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
+import ClipLoader from "react-spinners/ClipLoader";
 import "../App.css";
 import Login from './Login';
 import Register from './Register';
@@ -14,6 +15,19 @@ const camel2title = (text) => {
     const finalResult = text.trim().charAt(0).toUpperCase() + text.slice(1).toLowerCase();
     //console.log(finalResult);    
     return finalResult;
+}
+
+const time_diff = (startdate, enddate) => {
+    var duration = moment.duration(enddate.diff(startdate));
+    var hours = duration.asHours();    
+    var mins = duration.asMinutes()
+
+    //console.log(`Hours: ${hours} | Minuites: ${mins}`);
+    var hr = Math.floor(mins / 60);
+    var mn = (mins % 60);
+    let formatedString = `${hr}h ${mn}m`;
+    //console.log(`Hours: ${hr} | Minuites: ${mn}`);
+    return formatedString;
 }
 
 class FlightSearch extends Component {
@@ -35,6 +49,7 @@ class FlightSearch extends Component {
         this.state = {
             payload: this.props.location.state.payload,
             selectedTicketId: -1,
+            expandedSection: -1
         }
     }
 
@@ -43,7 +58,7 @@ class FlightSearch extends Component {
 
         let result = await this.props.UserStore.searchMyFlights(this.state.payload)
         .then(response => {
-            console.log(`Search Flight Result : ${JSON.stringify(response)}`);
+            //console.log(`Search Flight Result : ${JSON.stringify(response)}`);
         })
         .catch(error => {
             console.log(error);
@@ -62,31 +77,47 @@ class FlightSearch extends Component {
 //           active: active
 //       })
 //   }
-    onFlightSelect = (ticketid) => {
+    onFlightSelect = (event, ticketid) => {
+        // this.setState({
+        //     payload: this.state.payload,
+        //     selectedTicketId: ticketid,
+        //     expandedSection: this.state.expandedSection,
+        // })
+
         this.setState({
-            payload: this.state.payload,
             selectedTicketId: ticketid
-        })
+        });
+        //event.stopPropagation();
+    }
+
+    setToggleExpansion = (event, ticketid) => {
+        if(this.state.expandedSection === -1 || this.state.expandedSection !== ticketid) {
+            this.setState({expandedSection: ticketid});
+        }
+        else if(this.state.expandedSection === ticketid) {
+            this.setState({expandedSection: -1});
+            this.setState({selectedTicketId: -1});
+        }
     }
 
     getHeader() {
         return (
             <div className="search-header-section">
                 <Row className="search-header-row">
-                    <Col sm="3" md={{size: 3}}>
+                    <Col xs="4" sm="3" md={{size: 3}}>
                         <button className="search-button-filter ">Sort By : Duration</button>
                     </Col>
-                    <Col sm="1" md={{size: 1}}>
+                    <Col xs="2" sm="1" md={{size: 1}}>
                         <button className="search-button-filter ">Departure</button>
                     </Col>
-                    <Col sm="1" md={{size: 1}}></Col>
-                    <Col sm="1" md={{size: 1}}>
+                    <Col xs="1" sm="1" md={{size: 1}}></Col>
+                    <Col xs="2" sm="1" md={{size: 1}}>
                         <button className="search-button-filter ">Arrival</button>
                     </Col>
-                    <Col sm="2" md={{size: 2}}>
+                    <Col xs="2" sm="2" md={{size: 2}}>
                         <button className="search-button-filter search-activefilter">Price<i className="fa fa-caret-up filter-caret"></i></button>
                     </Col>
-                    <Col sm="4" md={{size: 4}}>
+                    <Col xs="1" sm="4" md={{size: 4}}>
 
                     </Col>
                 </Row>
@@ -100,15 +131,23 @@ class FlightSearch extends Component {
             currency: 'INR',
         });
 
+        let image_path = '';
+        try {
+            image_path = require(`../img/airlines/${flight.airlineInfo.image}`)
+        } catch (error) {
+            image_path = require(`../img/airlines/flight.png`);
+            console.log(error);
+        }
+
         return (
             <div className="search-item" key={flight.id}>
                 <Row className="flight-rowmain">
                     <Col sm="6" md={{size: 6}} className="flight-allview">
                         <Row className="flight-leftresult">
-                            <Col sm="6" md={{size: 6}} className="no-padding">
+                            <Col xs="4" sm="6" md={{size: 6}} className="no-padding">
                                 <ul className="flight-airline">
                                     {/* <li className="sort-detailist"></li> */}
-                                    <li className="sort-detailist"><img className="airline-logo " src={require(`../img/airlines/${flight.airlineInfo.image}`)}/></li>
+                                    <li className="sort-detailist"><img className="airline-logo " src={image_path}/></li>
                                     <li className="ars-mobcss sort-detailist multiair-lines-list">
                                         {flight.airlineInfo.displayName}
                                         <div className="atls-holdid">
@@ -122,7 +161,7 @@ class FlightSearch extends Component {
                                     </li>
                                 </ul>
                             </Col>
-                            <Col sm="2" md={{size: 2}} className="no-padding">
+                            <Col xs="3" sm="2" md={{size: 2}} className="no-padding">
                                 <ul className="search-city-section">
                                     <li className="search-city-section sort-detailist">
                                         <p className="ars-city">{flight.sourceLocation.code}</p>
@@ -131,13 +170,13 @@ class FlightSearch extends Component {
                                     </li>
                                 </ul>
                             </Col>
-                            <Col sm="2" md={{size: 2}} className="no-padding flight-arrow-center-arrow text-center">
+                            <Col xs="2" sm="2" md={{size: 2}} className="no-padding flight-arrow-center-arrow text-center">
                                 <div className="atls-holdid">
-                                    <span className="ars-arrowsun">Non-Stop</span>
+                                    <span className="ars-arrowsun">{flight.noOfStops === 0 ? `Non-Stop` : `${flight.noOfStops} Stop(s)`}</span>
                                 </div>
-                                <span className="arrow-allright arrowclass-loader-flight-search"></span>2h 5m
+                                <span className="arrow-allright arrowclass-loader-flight-search"></span>{time_diff(moment(flight.departureDateTime), moment(flight.arrivalDateTime))}
                             </Col>
-                            <Col sm="2" md={{size: 2}} className="no-padding">
+                            <Col xs="3" sm="2" md={{size: 2}} className="no-padding">
                                 <ul className="search-city-section">
                                     <li className="search-city-section sort-detailist">
                                         <p className="ars-city">{flight.destinationLocation.code}</p>
@@ -163,11 +202,11 @@ class FlightSearch extends Component {
                     <Col sm="6" md={{size: 6}} className="flightrightview">
                         <Row>
                             <Col sm="9" md={{size: 9}}>
-                                <div className={flight.innerFlights.length>2 ? "collapsed-flight-list transform" : "default-flight-list"}>
+                                <div className={flight.innerFlights.length>2 ? (this.state.expandedSection === flight.id ? "collapsed-flight-list transform expanded-flight-list" : "collapsed-flight-list transform") : "default-flight-list"}>
                                     <ul className="ars-radiolist transform">
                                         {flight.innerFlights.map(flt => {
                                             return (
-                                                <li className="main-radiolist" onClick={(ev) => this.onFlightSelect(flt.id) }>
+                                                <li className="main-radiolist" onClick={(ev) => this.onFlightSelect(ev, flt.id) } key={`li_key_${flt.id}`}>
                                                     <p className="ars-specialfare">
                                                         <span>{flt.id}</span> 
                                                     </p>
@@ -179,10 +218,10 @@ class FlightSearch extends Component {
                                                         </div>
                                                     </label>
                                                     <div className="atls-holder">
-                                                        <span className="label label-purple ars-flightlabel ars-refunsleft">Offer Fare</span>
+                                                        <span className={`label label-${flt.inventorySourceName} ars-flightlabel ars-refunsleft`}>{flt.inventorySourceName}</span>
                                                         <span className="ars-refunsleft ars-lastre">
                                                             {camel2title(flt.class)}
-                                                            <span className="nonrefund-type">, Non Refundable</span>
+                                                            <span className="nonrefund-type">, {flt.refundable === 'YES' ? 'Refundable' : 'Non Refundable'}</span>
                                                         </span>
                                                         <span className="handbag-icons" style={{'color': "#2149da"}}> Seats left: {flt.noOfPerson}</span>
                                                     </div>
@@ -191,7 +230,7 @@ class FlightSearch extends Component {
                                         })}
                                     </ul>
                                     {   
-                                        flight.innerFlights.length>2 ? <i className="fa fa-arrow-right exp-icon" aria-hidden="true"></i>
+                                        flight.innerFlights.length>2 ? <i className="fa fa-arrow-right exp-icon" aria-hidden="true" onClick={(ev) => this.setToggleExpansion(ev, flight.id)}></i>
                                         :
                                         <></>
                                     }
@@ -225,12 +264,13 @@ class FlightSearch extends Component {
             }
         }
 
-        console.log(`Grouped flights : ${JSON.stringify(flight_list)}`);
+        //console.log(`Grouped flights : ${JSON.stringify(flight_list)}`);
         return flight_list;
     }
 
     /* <FlightItem flight={flight}></FlightItem> */
     render() {
+        console.log(`Is processing ? => ${this.props.UserStore.SearchResult_Flights.processing}`);
         //const newFlightList = this.getGroupedFlights(this.props.UserStore.SearchResult_Flights.result);
         const Header = this.getHeader();
 
@@ -246,15 +286,20 @@ class FlightSearch extends Component {
                         <Col xs="12" sm="12" md={{size: 9}}>
                             <div id="search-result-container">
                                 {Header}
-                                {(!this.props.UserStore.processing && 
-                                    this.props.UserStore.SearchResult_Flights.result && 
+                                {(this.props.UserStore.SearchResult_Flights.result && 
                                         this.props.UserStore.SearchResult_Flights.result.length>0) ? 
                                         this.getGroupedFlights(this.props.UserStore.SearchResult_Flights.result).map(flight => {
                                             const flightItemDom = this.getFlightItem(flight)
                                             return flightItemDom;
                                     })
                                     : (
-                                        <span>No records found</span>
+                                        this.props.UserStore.SearchResult_Flights.processing ? 
+                                            <>
+                                                <ClipLoader color="#ffffff" loading={this.props.UserStore.SearchResult_Flights.processing} size={150} />
+                                                <span className="process-status">Loading ...</span>
+                                            </>
+                                        :
+                                            <span className="process-status">No records found</span>
                                     )
                                 }
                             </div>

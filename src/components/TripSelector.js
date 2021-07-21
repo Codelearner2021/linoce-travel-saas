@@ -194,7 +194,7 @@ const TripSelector = ({history, CommonStore, UserStore, selected_trip, trip_type
                         isLoading={false}
                         isClearable={false}
                         isRtl={false}
-                        isSearchable={false}
+                        isSearchable={true}
                         onChange={onChangeSource}
                         name="color"
                         getOptionLabel={option => `${option.name}`}
@@ -215,7 +215,7 @@ const TripSelector = ({history, CommonStore, UserStore, selected_trip, trip_type
                         isLoading={false}
                         isClearable={false}
                         isRtl={false}
-                        isSearchable={false}
+                        isSearchable={true}
                         onChange={onChangeDestination}
                         name="color"
                         getOptionLabel={option => `${option.name}`}
