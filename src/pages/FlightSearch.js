@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Container, TabContent, TabPane, Nav, NavItem, NavLink, Card, CardImg, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
-import ClipLoader from "react-spinners/ClipLoader";
+//import ClipLoader from "react-spinners/ClipLoader";
+import PulseLoader from "react-spinners/PulseLoader";
 import "../App.css";
 import Login from './Login';
 import Register from './Register';
@@ -294,10 +295,9 @@ class FlightSearch extends Component {
                                     })
                                     : (
                                         this.props.UserStore.SearchResult_Flights.processing ? 
-                                            <>
-                                                <ClipLoader color="#ffffff" loading={this.props.UserStore.SearchResult_Flights.processing} size={150} />
-                                                <span className="process-status">Loading ...</span>
-                                            </>
+                                            <div className="progressSection">
+                                                <PulseLoader color="#ffffff" loading={this.props.UserStore.SearchResult_Flights.processing} size={50} />
+                                            </div>
                                         :
                                             <span className="process-status">No records found</span>
                                     )

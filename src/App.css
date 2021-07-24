@@ -1359,3 +1359,46 @@ input[type=radio]:checked ~ .check::before {
   top: 50%;
   left: 3%;  
 }
+
+.progressSection {
+  /* background: red; */
+  overflow: hidden; 
+  text-align: center;  
+}
+.progressSection span {
+  display: inline-block;
+  /* float:left;  remove */
+  margin: 30px 10px 0 0;
+  padding: 5px 10px
+}
+.option-item {
+  /* min-height: 15px; */
+  display: flex;
+}
+.option-item i {
+  margin: 15px 5px;
+  color: rgb(191, 57, 57);
+  font-size: 1.2em;
+}
+.option-item div {
+  margin: 13px 10px;
+  color: rgb(41, 48, 232);
+}
+.selected-option-item {
+  font-size: .7em;
+  color: #5560f3;
+}
+.switch-icon {
+  content: "";
+  background-image: url("./assets/svg/switch.svg");
+  color: white;
+  position: absolute;
+  z-index: 1;
+  height: 30px;
+  width: 30px;
+  right: -16px;
+  top: 15px;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  background-position: center;  
+}

@@ -103,6 +103,7 @@ class UserStore {
             try
             {
                 //console.log(JSON.stringify(searchPayload));
+                var result;
                 var result = await this.userService.useToken(token).searchMyFlights(searchPayload);
         
                 //console.log(JSON.stringify(result));

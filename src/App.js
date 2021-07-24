@@ -153,7 +153,7 @@ class App extends Component {
           <Route exact path="/auth">
             <Authorization/>
           </Route>
-          <Route exact path="/flight-search">
+          <Route exact path="/search/flight">
             <FlightSearch/>
           </Route>
           {/* <Router>

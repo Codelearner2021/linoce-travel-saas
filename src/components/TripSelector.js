@@ -126,7 +126,7 @@ const TripSelector = ({history, CommonStore, UserStore, selected_trip, trip_type
         if(isValid) {
             //history.push('/flight-search');
             history.push({
-                pathname: '/flight-search',
+                pathname: '/search/flight',
                 state: {payload : searchPayload}
             });
         }
@@ -169,6 +169,23 @@ const TripSelector = ({history, CommonStore, UserStore, selected_trip, trip_type
       return current.isAfter(yesterday);
     };    
 
+    const formattedFlightItem = ({id, name, code, synonyms}) => {
+        return (
+            <div className="option-item">
+                <i className="fa fa-map-marker" aria-hidden="true"></i>
+                <div>
+                    {name}
+                </div>
+            </div>  
+        );
+    };
+
+    const formattedSingleValueLabel = (props) => {
+        return (
+            <div className="selected-option-item">{props.data.name}</div>
+        )
+    }
+
     // console.log(`Return Date => ${return_date}`);
     // console.log(`TripType => ${trip_type} | ${trip_type === 'Roundtrip'}`);
 
@@ -200,6 +217,8 @@ const TripSelector = ({history, CommonStore, UserStore, selected_trip, trip_type
                         getOptionLabel={option => `${option.name}`}
                         getOptionValue={option => `${option}`}
                         isOptionSelected={option => sourceCity.id == option.id}
+                        formatOptionLabel={formattedFlightItem}
+                        components={{SingleValue: formattedSingleValueLabel, DropdownIndicator:() => null, IndicatorSeparator:() => null}}
                         options={cities}
                     />
                 </Col>
@@ -221,6 +240,8 @@ const TripSelector = ({history, CommonStore, UserStore, selected_trip, trip_type
                         getOptionLabel={option => `${option.name}`}
                         getOptionValue={option => `${option}`}
                         isOptionSelected={option => destinationCity.id == option.id}
+                        formatOptionLabel={formattedFlightItem}
+                        components={{SingleValue: formattedSingleValueLabel, DropdownIndicator:() => null, IndicatorSeparator:() => null}}
                         options={cities}
                     />
                 </Col>
