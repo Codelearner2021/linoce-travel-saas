@@ -13,6 +13,7 @@ import Landing from "./pages/Landing";
 import Tour from "./pages/Tour";
 import Authorization from "./pages/Authorization";
 import FlightSearch from "./pages/FlightSearch";
+import FlightBooking from "./pages/FlightBooking";
 import axios from 'axios';
 import ErrorPage from "./components/ErrorPage";
 import { Alert } from 'reactstrap';
@@ -155,6 +156,9 @@ class App extends Component {
           </Route>
           <Route exact path="/search/flight">
             <FlightSearch/>
+          </Route>
+          <Route exact path="/search/flight/booking">
+            <FlightBooking/>
           </Route>
           {/* <Router>
             <Home path="/" />

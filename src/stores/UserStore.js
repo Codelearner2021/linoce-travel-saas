@@ -52,7 +52,10 @@ class UserStore {
     SearchResult_Flights = {
         payload: {},
         processing: false,
-        result: []
+        result: [],
+        search_traceid: null,
+        price_changed: false,
+        updatedFlight: null
     };
 
     constructor() {
@@ -94,8 +97,10 @@ class UserStore {
         let token = localStorage.getItem('token');
         if(!token) return null;
 
+        localStorage.removeItem('traceid');
         runInAction(() => {
             this.SearchResult_Flights.processing = true;
+            this.SearchResult_Flights.traceId = null;
             this.SearchResult_Flights.payload = searchPayload;
         });
 
@@ -103,17 +108,20 @@ class UserStore {
             try
             {
                 //console.log(JSON.stringify(searchPayload));
-                var result;
                 var result = await this.userService.useToken(token).searchMyFlights(searchPayload);
         
                 //console.log(JSON.stringify(result));
                 if(result && result.data) {
+                    //insert/update the traceid to localStorage
+                    let traceid = result.data.traceId;
                     //console.log(JSON.stringify(result.data));
                     runInAction(() => {
                         let flights =  result.data.searchedFlights || []; //result.data;
                         let dataLength = flights.length;
                         let rowsCount = result.data.totalCount;
-                        //this.SearchResult_Flights = flights;
+
+                        localStorage.setItem('traceid', traceid);
+                        this.SearchResult_Flights.search_traceid = traceid;
                         this.SearchResult_Flights.result = flights;
                         this.SearchResult_Flights.processing = flights.length>0 && (rowsCount !== flights.length);
         
@@ -180,6 +188,101 @@ class UserStore {
             }
             catch(ex) {
                 console.log(`Error in getRemainingFlights => ${ex}`);
+                reject(ex);
+            }
+        });
+    }
+
+    async getFareRule(id) {
+        let token = localStorage.getItem('token');
+        if(!token) return null;
+
+        runInAction(() => {
+            this.SearchResult_Flights.processing = true;
+        });
+
+        return new Promise(async (resolve, reject) => {
+            try
+            {
+                console.log(`${this.SearchResult_Flights.search_traceid}`);
+                var result = await this.userService.useToken(token).getFlightFareRule(this.SearchResult_Flights.search_traceid, id);
+        
+                console.log(JSON.stringify(result));
+                if(result && result.data) {
+                    //insert/update the traceid to localStorage
+                    // let traceid = result.data.traceId;
+                    //console.log(JSON.stringify(result.data));
+                    // runInAction(() => {
+                    //     let flights =  result.data.searchedFlights || []; //result.data;
+                    //     let dataLength = flights.length;
+                    //     let rowsCount = result.data.totalCount;
+                    //     //this.SearchResult_Flights = flights;
+                    //     this.setState({
+                    //         SearchResult_Flights: {
+                    //             payload: this.SearchResult_Flights.payload,
+                    //             search_traceid: traceid,
+                    //             result: flights,
+                    //             processing: flights.length>0 && (rowsCount !== flights.length)
+                    //         }
+                    //     });
+    
+                    //     // this.SearchResult_Flights.result = flights;
+                    //     // this.SearchResult_Flights.processing = flights.length>0 && (rowsCount !== flights.length);
+        
+                    //     //console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights)}`);
+                    // });
+        
+                    resolve(result.data);
+                }
+                else {
+                    resolve(result);
+                }
+            }
+            catch(ex) {
+                console.log(`Error in getFareRule => ${ex}`);
+                reject(ex);
+            }
+        });        
+    }
+
+    async getFareQuote(id) {
+        let token = localStorage.getItem('token');
+        if(!token) return null;
+
+        this.SearchResult_Flights.search_traceid = localStorage.getItem('traceid');
+
+        runInAction(() => {
+            this.SearchResult_Flights.processing = true;
+        });
+
+        return new Promise(async (resolve, reject) => {
+            try
+            {
+                console.log(`Trace Id : ${this.SearchResult_Flights.search_traceid}`);
+
+                var result = await this.userService.useToken(token).getFlightFareQuote(this.SearchResult_Flights.search_traceid, id);
+        
+                console.log(JSON.stringify(result));
+                if(result && result.data) {
+                    //insert/update the traceid to localStorage
+                    this.SearchResult_Flights.traceId = result.data.traceId;
+                    this.SearchResult_Flights.price_changed = result.data.priceChanged;
+                    //console.log(JSON.stringify(result.data));
+                    runInAction(() => {
+                        this.SearchResult_Flights.updatedFlight = result.data.updatedFlightTicket;
+                        this.SearchResult_Flights.processing = false;
+        
+                        //console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights)}`);
+                    });
+        
+                    resolve(result.data);
+                }
+                else {
+                    resolve(result);
+                }
+            }
+            catch(ex) {
+                console.log(`Error in getFareRule => ${ex}`);
                 reject(ex);
             }
         });

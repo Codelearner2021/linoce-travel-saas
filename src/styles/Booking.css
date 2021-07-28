@@ -1,0 +1,360 @@
+#booking {
+    width: 100%;
+    /* height: 100vh;
+    scroll-behavior: smooth;
+    overflow-y: scroll; */
+    margin: auto;
+    margin-top: 80px;
+}
+.apt-section {
+    padding: 15px 0;
+    background: #f2f2f2;
+    border: 1px solid #e2e2e2;
+}
+.booking-top-btn {
+    cursor: pointer;
+}
+.apt-common {
+    position: relative;
+    padding-left: 50px;
+}
+.apt-common::after {
+    content: '';
+    position: absolute;
+    background: #ccc;
+    width: 45%;
+    height: 1px;
+    right: 15px;
+    top: 19px;
+}
+.graycolor {
+    color: #9b9b9b;
+}
+.graycolor span {
+    /* font-family: "museoSans_500"; */
+    font-size: 11px;
+    color: #555;
+    font-weight: 400;
+}
+.apt-flightiti {
+    margin: 0;
+    font-size: 15px;
+}
+.apt-firstep::before {
+    position: absolute;
+    font-family: fontawesome;
+    left: 0;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    color: #bbb;
+    text-align: center;
+    line-height: 30px;
+    font-size: 17px;
+    border-radius: 150%;
+    content: "";
+    background-image: url(../assets/svg/imagestore.svg#step1_flight);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-color: #fff;
+}
+.apt-second::before {
+    position: absolute;
+    font-family: fontawesome;
+    left: 0;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    color: #bbb;
+    text-align: center;
+    line-height: 30px;
+    font-size: 17px;
+    border-radius: 150%;
+    content: "";
+    background-image: url(../assets/svg/imagestore.svg#step2_passenger);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-color: #fff;
+}
+.apt-third::before {
+    position: absolute;
+    font-family: fontawesome;
+    left: 0;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    color: #bbb;
+    text-align: center;
+    line-height: 30px;
+    font-size: 17px;
+    border-radius: 150%;
+    content: "";
+    background-image: url(../assets/svg/imagestore.svg#step3_review);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-color: #fff;
+}
+.apt-forth::before {
+    position: absolute;
+    font-family: fontawesome;
+    left: 0;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    color: #bbb;
+    text-align: center;
+    line-height: 30px;
+    font-size: 17px;
+    border-radius: 150%;
+    content: "";
+    background-image: url(../assets/svg/imagestore.svg#step3_payment);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-color: #fff;
+}
+.selected::before {
+    background-color: #333;
+}
+.selected span {
+    text-shadow: 0 0 black;
+}
+.selected h1,h2,h3,h4 {
+    text-shadow: 0 0 black;
+}
+#selected-ticket-section {
+    background-color: #f2f2f2;
+    padding: 5px 10px;
+    border-right: 2px solid #333;
+    min-height: 500px;
+}
+#booking-financial-section {
+    background-color: #f2f2f2;
+    padding: 5px 10px;
+    /* min-height: 500px; */
+    height: 100%;
+}
+.no-padding-right {
+    padding-right: 0px !important;
+}
+.no-padding-left {
+    padding-left: 0px !important;
+}
+.booking-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 5px 3px 10px 3px;
+}
+.apt-heading {
+    margin-top: 0;
+    margin-bottom: 0px;
+}
+.booking-header-right {
+    display: flex;
+    align-items: center;
+}
+.wrapper-mainclass {
+    box-shadow: 0 1px 5px 0 rgb(0 0 0 / 10%);
+    padding: 10px;
+    border-radius: 6px;
+}
+.scrollable {
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+}
+.apt-btmborder {
+    position: relative;
+    padding-bottom: 15px;
+}
+.desktop-bookback {
+    /* display: block; */
+    margin: 10px 0px 0px;
+}
+.apt-btmborder::before {
+    width: 103%;
+    bottom: 0;
+    left: -14px;
+    content: '';
+    position: absolute;
+    height: 1px;
+    background: #e5e5e5;
+}
+.apt-firstpr {
+    font-size: 13px;
+    background-color: #dadef7;
+    font-weight: bold;
+    padding: 5px 10px;
+    box-shadow: 0 1px 4px 0 rgb(0 0 0 / 14%);
+    border-radius: 3px;
+}
+.airline-logo {
+    width: 30px;
+    margin: 5px 3px 0px 2px;
+    vertical-align: middle;
+}
+.apt-ullist li {
+    display: inline-block;
+    vertical-align: top;
+    font-weight: bold;
+}
+.apt-btmborder ul, li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.apt-gridspan {
+    display: block;
+    line-height: 5px;
+    margin: 3px 0px;
+}
+.apt-listspan {
+    font-size: 10pt;
+}
+.apt-namelist li:first-child {
+    width: 40%;
+}
+.apt-namelist {
+    font-size: 12pt;
+    font-family: monospace;
+    color: #2436b9;    
+}
+.apt-namelist li {
+    display: inline-block;
+    /* font-weight: bold; */
+    vertical-align: top;
+}
+.apt-airportname {
+    display: grid;
+    line-height: 16px;
+}
+.apt-airplace {
+    position: relative;
+    display: grid;
+    line-height: 16px;
+}
+.apt-airterminal {
+    display: grid;
+}
+.apt-namelist li:nth-child(2) {
+    width: 18%;
+    font-size: 10px;
+    font-weight: normal;
+    line-height: 20px;
+}
+.apt-namelist li:last-child {
+    width: 40%;
+}
+.flight-arrow-itinenry-page {
+    height: 2px;
+    width: 50%;
+    background: #ccc;
+    margin-left: 0px;
+    position: relative;
+    margin-top: 2px;
+    display: block;
+}
+.apt-lasthour {
+    /* font-weight: bold; */
+    color: #2436b9;
+    font-size: 10pt;
+}
+.apt-stopcount, .apt-classname {
+    display: grid;
+}
+.flight-arrow-itinenry-page::before {
+    content: '';
+    position: absolute;
+    height: 8px;
+    top: -6px;
+    width: 2px;
+    background: #ccc;
+    right: 3px;
+    transform: rotate(135deg);
+}
+.flight-arrow-itinenry-page::after {
+    content: '';
+    position: absolute;
+    height: 8px;
+    top: 0;
+    width: 2px;
+    background: #ccc;
+    right: 3px;
+    transform: rotate(45deg);
+}
+.stop-text {
+    margin-left: 5px;
+}
+.ticketid {
+    display: block;
+    font-size: x-small;
+}
+.layover-text {
+    background: #0b2296;
+    display: inline;
+    display: initial;
+    padding: 7px 15px;
+    border-radius: 20px;
+    position: relative;
+    min-width: 230px;
+    box-shadow: 0 1px 4px 0 rgb(0 0 0 / 14%);
+    border: 1px solid #e2e2e2;
+    z-index: 1;
+    font-size: 14px;
+    color: #fff;
+    font-weight: 400;
+}
+.layover-text::before {
+    content: '';
+    position: absolute;
+    background: #adacef;
+    width: 50%;
+    height: 1px;
+    right: 100%;
+    top: 16px;
+}
+.layover-text::after {
+    content: '';
+    position: absolute;
+    background: #adacef;
+    width: 50%;
+    height: 1px;
+    left: 100%;
+    top: 16px;
+}
+.center-text {
+    text-align: center;
+    margin: 10px 0px;
+}
+.text-right {
+    text-align: right;
+}
+.pricing-container h4 {
+    margin: 20px 0px;
+    font-weight: 400;
+    font-size: 1.2rem;
+}
+.pricing-container .row {
+    margin: 5px;
+    min-height: 50px;
+    padding: auto;
+}
+.pricing-container .row::after {
+    content : "";
+    position: relative;
+    margin-left: 10px;
+    margin-right: 10px;
+    height  : 1px;
+    width   : 100%;  /* or 100px */
+    border-bottom:1px solid #b2b2bb;
+}
+.flight-rules {
+    font-family: monospace;
+    margin: 10px 2px;
+    font-weight: 400;
+    font-size: 10pt;
+}

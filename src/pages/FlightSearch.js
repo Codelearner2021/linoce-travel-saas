@@ -6,6 +6,7 @@ import "../App.css";
 import Login from './Login';
 import Register from './Register';
 import { withRouter } from "react-router-dom";
+import { toJS } from 'mobx';
 import { observer, inject } from 'mobx-react';
 
 var moment = require('moment');
@@ -45,10 +46,10 @@ class FlightSearch extends Component {
         //     active: this.initialActive ? this.initialActive : 'login'
         // }
 
-        console.log(`Props => ${JSON.stringify(this.props.location.state.payload)}`);
+        this.props.location.state && this.props.location.state.payload && console.log(`Props => ${JSON.stringify(this.props.location.state.payload)}`);
 
         this.state = {
-            payload: this.props.location.state.payload,
+            payload: (this.props.location.state && this.props.location.state.payload) ? this.props.location.state.payload : null,
             selectedTicketId: -1,
             expandedSection: -1
         }
@@ -89,6 +90,38 @@ class FlightSearch extends Component {
             selectedTicketId: ticketid
         });
         //event.stopPropagation();
+    }
+
+    initiateBooking = (event, parentFlight) => {
+        let flights = this.props.UserStore.SearchResult_Flights.result;
+        let innerFlights = parentFlight.innerFlights;
+        let selectedFlight = (innerFlights && innerFlights.length>0) ? innerFlights[0] : null;
+        
+        for (let index = 0; index < innerFlights.length; index++) {
+            const flight = innerFlights[index];
+            if(this.state.selectedTicketId === flight.id) {
+                selectedFlight = flight;
+                break;
+            }
+        }
+
+        if(selectedFlight) {
+            //history.push('/flight-search');
+            // this.props.history.push({
+            //     pathname: '/search/flight/booking',
+            //     state: {payload : Object.assign({}, selectedFlight)}
+            // });
+            this.props.history.push({
+                pathname: '/search/flight/booking',
+                state: {
+                    ticketid: selectedFlight.id,
+                    selectedFlight: toJS(selectedFlight)
+                }
+            });
+        }
+        else {
+            this.props.CommonStore.setAlert('Warning!', 'Please select a ticket to proceed for booking', true, false);
+        }
     }
 
     setToggleExpansion = (event, ticketid) => {
@@ -205,13 +238,14 @@ class FlightSearch extends Component {
                             <Col sm="9" md={{size: 9}}>
                                 <div className={flight.innerFlights.length>2 ? (this.state.expandedSection === flight.id ? "collapsed-flight-list transform expanded-flight-list" : "collapsed-flight-list transform") : "default-flight-list"}>
                                     <ul className="ars-radiolist transform">
-                                        {flight.innerFlights.map(flt => {
+                                        {flight.innerFlights.map((flt, idx) => {
                                             return (
                                                 <li className="main-radiolist" onClick={(ev) => this.onFlightSelect(ev, flt.id) } key={`li_key_${flt.id}`}>
                                                     <p className="ars-specialfare">
                                                         <span>{flt.id}</span> 
                                                     </p>
-                                                    <input type="radio" className="radio-input-invisible" id={`rdoflight_choice_${flt.id}`} data-type="false" name="rdoflight_choice" value={`rdoflight_choice_${flt.id}`} msri="" checked={this.state.selectedTicketId === flt.id} readOnly={true}/>
+                                                    <input type="radio" className="radio-input-invisible" id={`rdoflight_choice_${flt.id}`} data-type="false" name={`rdoflight_choice_${flight.flightNo}`} value={`rdoflight_choice_${flt.id}`} 
+                                                            msri="" checked={this.state.selectedTicketId === flt.id || idx === 0} readOnly={true}/>
                                                     <div className="check"></div>
                                                     <label htmlFor="rdoflight_choice" className="sort-labelfill">
                                                         <div>
@@ -238,7 +272,7 @@ class FlightSearch extends Component {
                                 </div>
                             </Col>
                             <Col sm="3" md={{size: 3}} className="">
-                                <Button outline color="primary" onClick={(ev) => this.props.CommonStore.setAlert('Confirmation', 'Feature coming coon!!', true, false)} disabled={!this.props.UserStore.isLoggedIn()}> Book <i className="fa fa-arrow-right" aria-hidden="true"></i></Button>
+                                <Button outline color="primary" onClick={(ev) => this.initiateBooking(ev, flight)} disabled={!this.props.UserStore.isLoggedIn()}> Book <i className="fa fa-arrow-right" aria-hidden="true"></i></Button>
                             </Col>
                         </Row>
                     </Col>

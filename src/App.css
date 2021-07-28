@@ -1402,3 +1402,17 @@ input[type=radio]:checked ~ .check::before {
   background-repeat: no-repeat;
   background-position: center;  
 }
+.hidden {
+  display: none!important;
+}
+.at-fontweight {
+  font-weight: 400;
+  /* font-size: x-small; */
+}
+.mt-10 {
+  margin-top: 10px;
+}
+p {
+  line-height: 18px;
+  margin: 0;
+}
