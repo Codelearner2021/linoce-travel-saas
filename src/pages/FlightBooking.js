@@ -6,6 +6,7 @@ import "../App.css";
 import "../styles/Booking.css";
 import Login from './Login';
 import Register from './Register';
+import { toJS } from 'mobx';
 import { withRouter } from "react-router-dom";
 import { observer, inject } from 'mobx-react';
 
@@ -95,6 +96,17 @@ class FlightBooking extends Component {
 //           active: active
 //       })
 //   }
+    BackToFlightSearch = (event, searchPayload) => {
+        this.props.history.push({
+            pathname: '/search/flight',
+            state: {payload : toJS(searchPayload)}
+        });        
+    }
+
+    RedirectToSearch = (event) => {
+        this.props.history.push({pathname: '/'});
+    }
+
     onFlightSelect = (event, ticketid) => {
         // this.setState({
         //     payload: this.state.payload,
@@ -368,10 +380,13 @@ class FlightBooking extends Component {
                     <h3 className="apt-heading">
                         <span>Flight Details</span>
                     </h3>
-                    <div className="booking-header-right">
-                        <div className="iterinery-pageback"> 
+                    <div className="booking-header-right" onClick={(ev) => this.RedirectToSearch(ev)}>
+                        <Button outline color="primary" className="asr-book">
+                            <i className="fa fa-angle-double-left"></i>&nbsp;<span>Back to Search</span>
+                        </Button>
+                        {/* <div className="iterinery-pageback"> 
                             <i className="fa fa-angle-double-left"></i> Back to Search
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 <div className="scrollable  wrapper-mainclass">
@@ -400,16 +415,22 @@ class FlightBooking extends Component {
                     </div>
                     <Row className="desktop-bookback">
                         <Col xs="12" sm="4" md={{size: 6}} className="">
-                            <Button outline color="primary" className="asr-book">
+                            <Button outline color="primary" className="asr-book" onClick={(ev) => this.BackToFlightSearch(ev, this.props.UserStore.SearchResult_Flights.payload)}>
                                 <i className="fa fa-angle-double-left"></i>&nbsp;<span>Back</span>
                             </Button>
                         </Col>
                         <Col xs="12" sm="8" md={{size: 6}} className="text-right confirming--button-price">
-                            {!this.props.UserStore.SearchResult_Flights.processing ? 
-                                <Button outline color="primary" className="asr-book">
-                                    <span>Add Passengers</span>&nbsp;<i className="fa fa-angle-double-right"></i>
-                                </Button>
-                            : null}
+                            <Button outline color="primary" className="asr-book" disabled={this.props.UserStore.SearchResult_Flights.processing}>
+                                {!this.props.UserStore.SearchResult_Flights.processing ? 
+                                    <>
+                                        <span>Add Passengers</span>&nbsp;<i className="fa fa-angle-double-right"></i>
+                                    </>
+                                :
+                                    <>
+                                        <span>Add Passengers</span>&nbsp;<i className="fa fa-angle-double-right"></i>&nbsp;<PulseLoader color="#ffffff" loading={this.props.UserStore.SearchResult_Flights.processing} size={10} />
+                                    </>
+                                }
+                            </Button>
                         </Col>
                     </Row>
                 </div>

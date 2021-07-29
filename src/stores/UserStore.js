@@ -102,6 +102,8 @@ class UserStore {
             this.SearchResult_Flights.processing = true;
             this.SearchResult_Flights.traceId = null;
             this.SearchResult_Flights.payload = searchPayload;
+            this.SearchResult_Flights.result = [];
+            this.SearchResult_Flights.search_traceid = null;
         });
 
         return new Promise(async (resolve, reject) => {

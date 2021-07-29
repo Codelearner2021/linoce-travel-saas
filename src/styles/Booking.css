@@ -156,6 +156,7 @@
 .booking-header-right {
     display: flex;
     align-items: center;
+    cursor: pointer;
 }
 .wrapper-mainclass {
     box-shadow: 0 1px 5px 0 rgb(0 0 0 / 10%);
@@ -194,7 +195,7 @@
 }
 .airline-logo {
     width: 30px;
-    margin: 5px 3px 0px 2px;
+    margin: 5px 5px 0px 2px;
     vertical-align: middle;
 }
 .apt-ullist li {
