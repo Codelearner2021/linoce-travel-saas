@@ -359,3 +359,34 @@
     font-weight: 400;
     font-size: 10pt;
 }
+
+/** Passenger section **/
+#passenger-section {
+    background-color: #f2f2f2;
+    padding: 5px 10px;
+    border-right: 2px solid #333;
+    min-height: 700px;
+}
+.bk-section-heading {
+    cursor: pointer;
+    background-color: #e4e4f9;
+    padding: 10px 10px 4px;
+}
+.name_title {
+    /* margin-top: 10px;
+    width: 100%;     */
+    background-color: #e9ecef;
+}
+.bk-passenger-section {
+    border: 1px solid #3332;
+    padding: 5px;    
+}
+.bk-section-heading h4,h5 {
+    font-size: 1.1rem !important;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 400 !important;
+}
+.dob-picker > input {
+    font-size: .9em;
+    color: #4a54f1;
+}

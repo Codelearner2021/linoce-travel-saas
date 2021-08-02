@@ -1,0 +1,65 @@
+.custom-control-label {
+    position: relative;
+    margin-bottom: 0;
+    vertical-align: top;
+}
+label {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+input[type="radio"], input[type="checkbox"] {
+    box-sizing: border-box;
+    padding: 0;
+}
+.custom-control-input {
+    position: absolute;
+    left: 0;
+    z-index: -1;
+    width: 1rem;
+    height: 1.25rem;
+    opacity: 0;
+}
+.custom-switch {
+    padding-left: 2.25rem;
+    padding: 5px 5px 5px 2.25rem;
+    background-color: #e9ecef;
+    border-left: 1px solid #ded4d4;    
+    cursor: pointer !important;
+}
+.custom-control {
+    position: relative;
+    display: block;
+    min-height: 1.5rem;
+    padding-left: 1.5rem;
+}
+.custom-switch .custom-control-label::before {
+    left: -2.25rem;
+    width: 1.75rem;
+    pointer-events: all;
+    border-radius: 0.5rem;
+}
+.custom-control-label::before, .custom-file-label, .custom-select {
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.custom-control-label::before {
+    position: absolute;
+    top: 0.25rem;
+    left: -1.5rem;
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    pointer-events: none;
+    content: "";
+    background-color: #fff;
+    border: #adb5bd solid 1px;
+}
+.custom-control-label::after {
+    position: absolute;
+    top: 0.25rem;
+    left: -1.5rem;
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    content: "";
+    background: no-repeat 50% / 50% 50%;
+}
