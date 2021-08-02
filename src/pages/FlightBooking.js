@@ -59,6 +59,8 @@ class FlightBooking extends Component {
                 firstName: '',
                 lastName: '',
                 wheelchair: false,
+                passportNeeded: false,
+                passport: '',
                 dobNeeded: false,
                 dob: ''
             });
@@ -72,6 +74,8 @@ class FlightBooking extends Component {
                 firstName: '',
                 lastName: '',
                 wheelchair: false,
+                passportNeeded: false,
+                passport: '',
                 dobNeeded: false,
                 dob: ''
             });
@@ -84,6 +88,8 @@ class FlightBooking extends Component {
                 title: '',
                 firstName: '',
                 lastName: '',
+                passportNeeded: false,
+                passport: '',
                 dobNeeded: true,
                 dob: '',
             });
@@ -150,6 +156,28 @@ class FlightBooking extends Component {
         }
     }
 
+    hasDuplicatePassengers() {
+        let flag = false;
+        const map = new Map();
+
+        let passengers = this.state.passengers.adults.concat(this.state.passengers.childs);
+        passengers = passengers.concat(this.state.passengers.infants);
+        
+        for (let index = 0; index < passengers.length; index++) {
+            const passenger = passengers[index];
+            let key = `${passenger.firstName.toLowerCase()}_${passenger.lastName.toLowerCase()}`;
+            flag = map.has(key);
+            if(!flag) {
+                map.set(key, passenger);
+            }
+            else {
+                break;
+            }
+        }
+
+        return flag;
+    }
+
     //Start of Events
     RedirectToSearch = (event) => {
         this.props.history.push({pathname: '/'});
@@ -178,10 +206,11 @@ class FlightBooking extends Component {
         let step = this.state.step;
         console.log(`Passengers: ${JSON.stringify(this.state.passengers)}`);
 
-        if(step === 2 || (stepnumber>-1 && stepnumber !== 2)) {
+        if(step === 2) {
             let passengerValid = this.formRef.current.reportValidity();
-            if(!passengerValid) {
-                this.props.CommonStore.setAlert('Warning!', 'Please provide all the passenger details', true, false);
+            let hasDuplicatePassengers = this.hasDuplicatePassengers();
+            if(!passengerValid || hasDuplicatePassengers) {
+                this.props.CommonStore.setAlert('Warning!', 'Please provide all the passenger details. Passenger names can`t be duplicate', true, true);
                 return false;
             }
         }
@@ -652,7 +681,7 @@ class FlightBooking extends Component {
         );
     }
 
-    getInfantPassengerSection(infantIndex) {
+    getInfantPassengerSection(infantIndex, isViewOnly = false) {
         return (
             <div key={`infantkey-${infantIndex}`} className="bk-passenger-section">
                 <div className="bk-section-heading pax-box-arrow" onClick={(ev) => this.toggleSection(ev, 'infant', infantIndex)}>
@@ -687,7 +716,7 @@ class FlightBooking extends Component {
                                             <InputGroupAddon addonType="prepend">
                                                 <InputGroupText><i className="fa fa-calendar-o" aria-hidden="true"></i></InputGroupText>
                                             </InputGroupAddon>
-                                            <Datetime className="dob-picker" dateFormat="YYYY-MM-DD" timeFormat={false} value={this.state.passengers.infants[infantIndex].dob} onChange={(ev) => this.handleInputChange(ev, 'infant','dob',infantIndex)} closeOnSelect={true} closeOnTab={true} 
+                                            <Datetime className="dob-picker" dateFormat="YYYY-MM-DD" timeFormat={false} placeholder="Date of birth" value={this.state.passengers.infants[infantIndex].dob} onChange={(ev) => this.handleInputChange(ev, 'infant','dob',infantIndex)} closeOnSelect={true} closeOnTab={true} 
                                                     isValidDate={(currentDate, selectedDate) => this.disablePastDt(currentDate, selectedDate, this.state.selected_flight.departureDateTime, 2, -1)} inputProps={{required: true}}/>
                                         </InputGroup>
                                     </Col>
@@ -700,7 +729,7 @@ class FlightBooking extends Component {
         );
     }
 
-    getContactDetailsSection() {
+    getContactDetailsSection(isViewOnly = false) {
         return (
             <div key={`contactkey-0`} className="bk-passenger-section">
                 <div className="bk-section-heading pax-box-arrow" onClick={(ev) => this.toggleSection(ev, 'contactDetails', -1)}>
@@ -714,6 +743,7 @@ class FlightBooking extends Component {
                 <Collapse isOpen={this.state.passengers.contactDetails.expanded}>
                     <Card>
                         <CardBody>
+                        {!isViewOnly ?
                             <Row>
                                 <Col xs="12" sm="6" md="6" style={{marginBottom: "5px"}}>
                                     <InputGroup>
@@ -724,23 +754,43 @@ class FlightBooking extends Component {
                                     </InputGroup>
                                 </Col>
                             </Row>
+                        : null}
                             <Row>
-                                <Col xs="12" sm="5" md={{size: 4}} className="">
-                                    <InputGroup>
-                                        <InputGroupAddon addonType="prepend">
-                                            <InputGroupText><i className="fa fa-mobile" aria-hidden="true"></i></InputGroupText>
-                                        </InputGroupAddon>
-                                        <Input placeholder="Mobile" type="tel" pattern="[0-9]{11}|[0-9]{10}" value={this.state.passengers.contactDetails.mobile} onChange={(ev) => this.handleInputChange(ev, 'contactDetails','mobile',-1)} required={true}/>
-                                    </InputGroup>
-                                </Col>
-                                <Col xs="12" sm="5" md={{size: 4}} className="">
-                                    <InputGroup>
-                                        <InputGroupAddon addonType="prepend">
-                                            <InputGroupText><i className="fa fa-envelope-o" aria-hidden="true"></i></InputGroupText>
-                                        </InputGroupAddon>
-                                        <Input placeholder="Email" type="email" value={this.state.passengers.contactDetails.email} onChange={(ev) => this.handleInputChange(ev, 'contactDetails','email',-1)} required={true}/>
-                                    </InputGroup>
-                                </Col>
+                            {isViewOnly ?
+                                <>
+                                    <Col xs="12" sm="5" md={{size: 4}} className="">
+                                        <div className="psngr-contact-mobile">
+                                            <i className="fa fa-mobile" aria-hidden="true"></i>&nbsp;
+                                            <span>{this.state.passengers.contactDetails.mobile}</span>
+                                        </div>
+                                    </Col>
+                                    <Col xs="12" sm="5" md={{size: 4}} className="">
+                                        <div className="psngr-contact-email">
+                                            <i className="fa fa-envelope-o" aria-hidden="true"></i>&nbsp;
+                                            <span>{this.state.passengers.contactDetails.email}</span>
+                                        </div>
+                                    </Col>
+                                </>
+                            :
+                                <>
+                                    <Col xs="12" sm="5" md={{size: 4}} className="">
+                                        <InputGroup>
+                                            <InputGroupAddon addonType="prepend">
+                                                <InputGroupText><i className="fa fa-mobile" aria-hidden="true"></i></InputGroupText>
+                                            </InputGroupAddon>
+                                            <Input placeholder="Mobile" type="tel" pattern="[0-9]{11}|[0-9]{10}" value={this.state.passengers.contactDetails.mobile} onChange={(ev) => this.handleInputChange(ev, 'contactDetails','mobile',-1)} required={true}/>
+                                        </InputGroup>
+                                    </Col>
+                                    <Col xs="12" sm="5" md={{size: 4}} className="">
+                                        <InputGroup>
+                                            <InputGroupAddon addonType="prepend">
+                                                <InputGroupText><i className="fa fa-envelope-o" aria-hidden="true"></i></InputGroupText>
+                                            </InputGroupAddon>
+                                            <Input placeholder="Email" type="email" value={this.state.passengers.contactDetails.email} onChange={(ev) => this.handleInputChange(ev, 'contactDetails','email',-1)} required={true}/>
+                                        </InputGroup>
+                                    </Col>
+                                </>
+                            }
                             </Row>
                         </CardBody>
                     </Card>
@@ -794,18 +844,18 @@ class FlightBooking extends Component {
         )
     }    
 
-    getPassengersInfo(flight) {
+    getPassengersInfo(flight, isViewOnly = false) {
         let adult = flight.pricing.adultPAX;
         let child = flight.pricing.childPAX;
         let infant = flight.pricing.infantPAX;
 
-        let adultsView = this.getAdultsView(adult);
-        let childsView = this.getChildsView(child);
-        let infantsView = this.getInfantsView(infant);
+        let adultsView = this.getAdultsView(adult, isViewOnly);
+        let childsView = this.getChildsView(child, isViewOnly);
+        let infantsView = this.getInfantsView(infant, isViewOnly);
 
         let actionSection = this.getActionSection();
 
-        let contactDetailsSection = this.getContactDetailsSection();
+        let contactDetailsSection = this.getContactDetailsSection(isViewOnly);
 
         return (
             <div id="passenger-section">
@@ -826,6 +876,16 @@ class FlightBooking extends Component {
     }
 
     getActionSection() {
+        let buttonText = "Add Passengers";
+
+        if(this.state.step === 2) {
+            buttonText = "Review Bookings";
+        } 
+        else if(this.state.step === 3) {
+            buttonText = "Pay & Book";
+        }
+
+
         return (
             <Row className="desktop-bookback">
                 <Col xs="12" sm="4" md={{size: 6}} className="">
@@ -837,16 +897,156 @@ class FlightBooking extends Component {
                     <Button outline color="primary" className="asr-book" disabled={this.props.UserStore.SearchResult_Flights.processing} onClick={(ev) => this.MoveNext(ev)}>
                         {!this.props.UserStore.SearchResult_Flights.processing ? 
                             <>
-                                <span>Add Passengers</span>&nbsp;<i className="fa fa-angle-double-right"></i>
+                                <span>{buttonText}</span>&nbsp;<i className="fa fa-angle-double-right"></i>
                             </>
                         :
                             <>
-                                <span>Add Passengers</span>&nbsp;<i className="fa fa-angle-double-right"></i>&nbsp;<PulseLoader color="#ffffff" loading={this.props.UserStore.SearchResult_Flights.processing} size={10} />
+                                <span>{buttonText}</span>&nbsp;<i className="fa fa-angle-double-right"></i>&nbsp;<PulseLoader color="#ffffff" loading={this.props.UserStore.SearchResult_Flights.processing} size={10} />
                             </>
                         }
                     </Button>
                 </Col>
             </Row>
+        );
+    }
+
+    getPassengerRows(passengers, type) {
+        if(!passengers) return null;
+        let items = [];
+
+        passengers.map((passenger, idx) => {
+            let passengerDom = <Row key={`${type}-key-${idx}`} className="passenger-item-info">
+                <Col xs="2" sm="2" md={{size: 1}} className="">
+                    <span>{idx+1}</span>
+                </Col>
+                <Col xs="9" sm="9" md={{size: 5}} className="">
+                    <div>{`${passenger.title} ${passenger.firstName.toUpperCase()} ${passenger.lastName.toUpperCase()} (${type})`}</div>
+                    <div>
+                        {passenger.dobNeeded ?
+                            <span className="aux-value-dob">{passenger.dobNeeded ? moment(passenger.dob).format('DD-MMM-YYYY') : ''}</span>
+                        : null}
+                        
+                        {passenger.passportNeeded ?
+                            <span className="aux-value-passport">{passenger.passportNeeded ? passenger.passport.toUpperCase() : ''}</span>
+                        : null}
+
+                        {type === 'I' ?
+                            null
+                            :
+                            <span className="aux-value-wheelchair">{passenger.wheelchair ? <i className="fa fa-check service-taken" aria-hidden="true"></i> : <i className="fa fa-times service-not-taken" aria-hidden="true"></i>}</span>
+                        }
+                    </div>
+                </Col>
+                <Col xs="1" sm="1" md={{size: 1}} className="">
+                    <span>NA</span>
+                </Col>
+                <Col xs="1" sm="1" md={{size: 1}} className="">
+                    <span>NA</span>
+                </Col>
+            </Row>
+
+            items.push(passengerDom);
+        });
+
+        return items;
+    }
+
+    getPassengerInfoView() {
+        return (
+            <>
+            <Row className="desktop-bookback">
+                <Col xs="12" sm="12" md={{size: 12}} className="">
+                    <h5>Passenger Details ({this.state.passengers.adults.length + this.state.passengers.childs.length}{this.state.passengers.infants.length>0 ? ` + ${this.state.passengers.infants.length}` : ''})</h5>
+               </Col>
+            </Row>
+            <Row className="row-heading bottom-border">
+                <Col xs="1" sm="1" md={{size: 1}} className="">
+                    <span>Sr.</span>
+                </Col>
+                <Col xs="9" sm="9" md={{size: 5}} className="">
+                    <span>Name, DOB, Passport &amp; Wheelchair</span>
+                </Col>
+                <Col xs="1" sm="1" md={{size: 1}} className="">
+                    <span>Seat</span>
+                </Col>
+                <Col xs="1" sm="1" md={{size: 2}} className="">
+                    <span>Meals &amp; Baggage</span>
+                </Col>
+            </Row>
+            {this.getPassengerRows(this.state.passengers.adults, 'A')}
+            {this.getPassengerRows(this.state.passengers.childs, 'C')}
+            {this.getPassengerRows(this.state.passengers.infants, 'I')}
+            </>
+        );
+    }
+
+    getContactInfoView() {
+        return (
+            <>
+                <Row className="desktop-bookback">
+                    <Col xs="12" sm="12" md={{size: 12}} className="">
+                        <h5>Contact Details</h5>
+                    </Col>
+                </Row>
+                <Row className="bottom-border">
+                    <Col xs="12" sm="12" md={{size: 4}} className="">
+                        <div className="psngr-contactinfo-email"><i className="fa fa-envelope-o service-taken" aria-hidden="true"></i>&nbsp;{this.state.passengers.contactDetails.email}</div>
+                    </Col>
+                    <Col xs="12" sm="12" md={{size: 4}} className="">
+                        <div className="psngr-contactinfo-mobile"><i className="fa fa-mobile service-taken" aria-hidden="true"></i>&nbsp;{this.state.passengers.contactDetails.mobile}</div>
+                    </Col>
+                </Row>
+            </>
+        )
+    }
+
+    getFlightDetailsInfoWithPassengerView(flight) {
+        const PassengersInfo = this.getPassengerInfoView();
+        const ContactInfo = this.getContactInfoView();
+        let actionSection = this.getActionSection();
+
+        return (
+            <div id="selected-ticket-section">
+                <div className="booking-header">
+                    <h3 className="apt-heading">
+                        <span>Review</span>
+                    </h3>
+                    <div className="booking-header-right" onClick={(ev) => this.RedirectToSearch(ev)}>
+                        <Button outline color="primary" className="asr-book">
+                            <i className="fa fa-angle-double-left"></i>&nbsp;<span>Back to Search</span>
+                        </Button>
+                    </div>
+                </div>
+                <div className="scrollable  wrapper-mainclass">
+                    <div className="apt-btmborder">
+                        <p className="apt-firstpr">
+                            {flight.sourceLocation.code}
+                            <span className="apt-arrowpr">{flight.tripType === 'ONE' ? ' → ' : ' ↔ '}</span>
+                            {flight.destinationLocation.code}&nbsp;
+                            <span className="graycolor at-fontweight">
+                                <span>on</span> &nbsp;{moment(flight.departureDateTime).format('ddd, MMM Do YYYY')}
+                            </span>
+                            <span className="apt-redpr at-fontweight hidden">
+                                <i className="fa fa-info-circle"></i>
+                                <span>Arrives next day</span>
+                            </span>
+                            <span className="pull-right">
+                                <i className="fa fa-clock-o"></i> {time_diff(moment(flight.departureDateTime), moment(flight.arrivalDateTime))}
+                            </span>
+                        </p>
+                        <div>
+                            {flight.segments && flight.segments.length>0 ? this.getSegments(flight) : this.getSelectedFlightDetails(flight)}
+                        </div>
+                    </div>
+                    <div className="passenger-section">
+                        {PassengersInfo}
+                    </div>
+                    <div className="passenger-contact-section">
+                        {ContactInfo}
+                    </div>
+                    {actionSection}
+                </div>
+            </div>
         );
     }
 
@@ -884,12 +1084,29 @@ class FlightBooking extends Component {
         )
     }
 
+    getThirdStepView() {
+        const FlightDetails = this.getFlightDetailsInfoWithPassengerView(this.state.selected_flight);
+        
+        const PricingInfo = this.getFlightPricingInfo(this.state.selected_flight);
+
+        return (
+            <Row>
+                <Col xs="12" sm="12" md={{size: 9}} className="no-padding-right">
+                    {FlightDetails}
+                </Col>
+                <Col xs="12" sm="12" md={{size: 3}} className="no-padding-left">
+                    {PricingInfo}
+                </Col>
+            </Row>
+        )
+    }
+
     /* <FlightItem flight={flight}></FlightItem> */
     render() {
         console.log(`Is processing ? => ${this.props.UserStore.SearchResult_Flights.processing}`);
         const Header = this.getHeader(this.state.step);
 
-        const StepView = (this.state.step === 1 ? this.getFirstStepView() : (this.state.step === 2 ? this.getSecondStepView() : null));
+        const StepView = (this.state.step === 1 ? this.getFirstStepView() : (this.state.step === 2 ? this.getSecondStepView() : (this.state.step === 3 ? this.getThirdStepView() : null)));
 
         //console.log(`Final Group Result: ${newFlightList}`);
 

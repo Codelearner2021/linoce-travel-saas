@@ -3,7 +3,7 @@ import CompanyService from '../services/CompanyService';
 import UserService from '../services/UserService';
 import CommonService from '../services/CommonService';
 
-const ALERT_TIMEOUT = 3000;
+const ALERT_TIMEOUT = 10000;
 
 export class Common {
     cities = [];

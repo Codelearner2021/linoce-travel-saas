@@ -390,3 +390,58 @@
     font-size: .9em;
     color: #4a54f1;
 }
+.row-heading {
+    font-size: 13px;
+    color:#666;
+}
+.bottom-border {
+    border-bottom: 2px solid #a7a4a4;
+}
+.aux-value-wheelchair {
+    font-size: 13px;
+    border-right: 1px solid #999;
+    padding-right: 5px;    
+}
+.aux-value-wheelchair::before {
+    font-family: fontawesome;
+    color: #4c58ea;
+    content: "\F193";
+    margin-right: 3px;
+    font-size: small;
+}
+.aux-value-wheelchair::after {
+    border: 1px solid #666;
+}
+.aux-value-passport {
+    font-size: 13px;
+    border-right: 1px solid #999;
+    padding-right: 5px;    
+}
+.aux-value-passport::after {
+    border: 1px solid #666;
+}
+.aux-value-dob {
+    font-size: 13px;
+    border-right: 1px solid #999;
+    padding-right: 5px;    
+}
+.aux-value-dob::before {
+    font-family: fontawesome;
+    color: #4c58ea;
+    content: "\F274";
+    margin-right: 3px;
+    font-size: 13px;
+}
+.passenger-item-info {
+    line-height: 1.2;
+}
+.passenger-contact-section {
+    margin: 20px 0px 20px 0px;
+    border-top: 1px solid #b7b4b4;
+}
+.service-taken {
+    color: #19b60b;
+}
+.service-not-taken {
+    color: #b82225;
+}
