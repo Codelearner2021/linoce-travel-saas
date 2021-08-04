@@ -52,6 +52,7 @@ class UserStore {
     SearchResult_Flights = {
         payload: {},
         processing: false,
+        processing_suspended: false,
         result: [],
         search_traceid: null,
         price_changed: false,
@@ -99,6 +100,7 @@ class UserStore {
 
         localStorage.removeItem('traceid');
         runInAction(() => {
+            this.SearchResult_Flights.processing_suspended = false;
             this.SearchResult_Flights.processing = true;
             this.SearchResult_Flights.traceId = null;
             this.SearchResult_Flights.payload = searchPayload;
@@ -129,8 +131,11 @@ class UserStore {
         
                         //console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights)}`);
                     });
+
+                    console.log(`Process suspended : ${this.SearchResult_Flights.processing_suspended}`);
         
-                    if(this.SearchResult_Flights.processing) {
+                    if(this.SearchResult_Flights.processing && !this.SearchResult_Flights.processing_suspended) {
+                        console.log(`Bringing next page of tickets : ${this.SearchResult_Flights.processing} | Suspended : ${this.SearchResult_Flights.processing_suspended}`);
                         await this.getRemainingFlights(result.data);
                     }
                     resolve(result.data);
@@ -179,10 +184,10 @@ class UserStore {
                             this.SearchResult_Flights.processing = false;
                         }
         
-                        console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights.result)}`);
+                        //console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights.result)}`);
                     });
         
-                    if(this.SearchResult_Flights.processing) {
+                    if(this.SearchResult_Flights.processing && !this.SearchResult_Flights.processing_suspended) {
                         await this.getRemainingFlights({'traceId': cacheKey, 'pageSize': pageSize, 'pageIndex': pageIndex});
                     }
                     resolve(result.data);
@@ -254,6 +259,7 @@ class UserStore {
         this.SearchResult_Flights.search_traceid = localStorage.getItem('traceid');
 
         runInAction(() => {
+            this.SearchResult_Flights.processing_suspended = true;
             this.SearchResult_Flights.processing = true;
         });
 
@@ -264,7 +270,7 @@ class UserStore {
 
                 var result = await this.userService.useToken(token).getFlightFareQuote(this.SearchResult_Flights.search_traceid, id);
         
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 if(result && result.data) {
                     //insert/update the traceid to localStorage
                     this.SearchResult_Flights.traceId = result.data.traceId;
@@ -273,6 +279,7 @@ class UserStore {
                     runInAction(() => {
                         this.SearchResult_Flights.updatedFlight = result.data.updatedFlightTicket;
                         this.SearchResult_Flights.processing = false;
+                        this.SearchResult_Flights.processing_suspended = false;
         
                         //console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights)}`);
                     });
@@ -294,6 +301,29 @@ class UserStore {
         let token = localStorage.getItem('token');
         //if(!token) return null;
         return token !== null;
+    }
+
+    async getMyWallet() {
+        let token = localStorage.getItem('token');
+        if(!token) return null;
+
+        var result = await this.userService.useToken(token).getMyWallet();
+
+        console.log(JSON.stringify(result));
+        if(result && result.data) {
+            console.log(JSON.stringify(result.data));
+            runInAction(() => {
+                let user = result.data;
+                this.User = user;
+
+                console.log(`User => ${JSON.stringify(this.User)}`);
+            });
+
+            return result.data;
+        }
+        else {
+            return result;
+        }
     }
 };
 

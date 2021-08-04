@@ -702,7 +702,8 @@ h3.title {
 .themed-container {
   width: 100% !important;
 }
-@media (min-width: 986px) {
+/* @media (min-width: 986px) */
+@media (min-width: 1100px) {
   .themed-container {
     width: 85% !important;
   }

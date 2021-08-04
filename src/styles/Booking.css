@@ -137,6 +137,13 @@
     /* min-height: 500px; */
     height: 100%;
 }
+.no-margin {
+    margin: 0px !important;
+}
+.no-padding {
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+}
 .no-padding-right {
     padding-right: 0px !important;
 }
@@ -444,4 +451,53 @@
 }
 .service-not-taken {
     color: #b82225;
+}
+.tab-section {
+    background-color: #e0e0e0;
+    padding: 0px;
+}
+#selected-ticket-payment-section .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    border-left: 4px solid #ff0000 !important;
+    padding-left: 5px;
+    border-color: snow;
+    border-radius: 0px !important;
+}
+#selected-ticket-payment-section .nav-link {
+    color: #262525 !important;
+    cursor: pointer;
+    /* border-bottom: 1px solid #6f6c6c; */
+}
+#selected-ticket-payment-section .nav-link:hover {
+    color: #000000 !important;
+}
+#selected-ticket-payment-section .nav-item {
+    border-bottom: 1px solid #b4b2e4 !important;
+}
+.wrapper-payment-mainclass {
+    box-shadow: 0 1px 5px 0 rgb(0 0 0 / 10%);
+    padding: 5px;
+    border-radius: 5px;
+}
+#selected-ticket-payment-section {
+    background-color: #f2f2f2;
+    padding: 5px 10px;
+    border-right: 2px solid #333;
+    min-height: 400px;
+}
+.bookbypay-section {
+    font-size: 13px;
+    background: #d2eccd;
+}
+.bookbypay-section i {
+    color: #ff0000;
+}
+.bookbypay-section .disclaimer {
+    color: #ff0000;
+}
+
+
+.payment-choices {
+    font-size: 13px !important;
 }

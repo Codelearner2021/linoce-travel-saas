@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Collapse, Container, TabContent, TabPane, Nav, NavItem, NavLink, Card, CardBody, CardImg, Input, InputGroup, InputGroupText, 
     InputGroupAddon, InputGroupButtonDropdown, Button, CardTitle, CardText, Row, Col, CustomInput, Label } from 'reactstrap';
+import classnames from 'classnames';
 //import ClipLoader from "react-spinners/ClipLoader";
 import Switch from '../components/custom_components/switch/Switch'
 import Datetime from 'react-datetime';
@@ -9,7 +10,7 @@ import "../App.css";
 import "../styles/Booking.css";
 import Login from './Login';
 import Register from './Register';
-import { toJS } from 'mobx';
+import { toJS, reaction } from 'mobx';
 import { withRouter } from "react-router-dom";
 import { observer, inject } from 'mobx-react';
 
@@ -37,11 +38,15 @@ const time_diff = (startdate, enddate) => {
 }
 
 class FlightBooking extends Component {
+    disposer;
+
     constructor(props) {
         super(props);
 
         this.formRef = React.createRef();
         this.disablePastDt = this.disablePastDt.bind(this);
+        this.toggleTab = this.toggleTab.bind(this);
+
         let selectedFlight = this.props.location.state.selectedFlight;
 
         let adults = [];
@@ -97,6 +102,7 @@ class FlightBooking extends Component {
 
         this.state = {
             currentUser: toJS(this.props.CompanyStore.LoggedInUser.user),
+            wallet: {},
             selected_flight: selectedFlight,
             passengers: {
                 adults: adults,
@@ -118,7 +124,18 @@ class FlightBooking extends Component {
                 }
             },
             price_changed: this.props.UserStore.SearchResult_Flights.processing,
-            step: 1
+            payment: {
+                mode: '',
+                billedAmount: 0.00,
+                useWallet: false,
+                fromWallet: 0.00,
+                useCredit: false,
+                fromCredit: 0.00,
+                useOnline: false,
+                fromOnline: 0.00
+            },
+            step: 1,
+            activeTab: '1'
         }
 
         if(!selectedFlight) {
@@ -131,15 +148,48 @@ class FlightBooking extends Component {
 
     async componentDidMount() {
         console.log(`Booking process initiated for => ${JSON.stringify(this.state.selectedTicket)}`);
+        //let user = toJS(this.props.CompanyStore.LoggedInUser.user);
+        //console.log(`BOOKING: Loggin User => ${JSON.stringify(this.props.CompanyStore.LoggedInUser)}`);
+
+        this.disposer = reaction(
+            () => this.props.CompanyStore.LoggedInUser.user,
+            (arg) => {
+                this.setState({
+                    currentUser: this.props.CompanyStore.LoggedInUser.user
+                })
+            }
+        );
 
         let result = await this.props.UserStore.getFareQuote(this.state.selected_flight.id)
         .then(response => {
             console.log(`Search Flight Result : ${JSON.stringify(response)}`);
-            this.setState({selected_flight: response.updatedFlightTicket, price_changed: response.priceChanged});
+            let payment = this.state.payment;
+            payment.billedAmount = response.updatedFlightTicket ? response.updatedFlightTicket.pricing.totalPerPAX :  0.00;
+            this.setState(
+            {
+                selected_flight: response.updatedFlightTicket, 
+                price_changed: response.priceChanged,
+                payment: payment
+            });
         })
         .catch(error => {
             console.log(error);
         });
+
+        let wallet = await this.props.UserStore.getMyWallet()
+        .then(response => {
+            console.log(`User with Wallet : ${JSON.stringify(response)}`);
+            this.setState({currentUser: response, wallet: response.wallet});
+
+            return response.wallet;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
+
+    componentWillUnmount() {
+        this.disposer();
     }
 
     BackToFlightSearch = (event, searchPayload) => {
@@ -245,7 +295,43 @@ class FlightBooking extends Component {
 
         this.setState({passengers});
     }
+
+    toggleTab(tab) {
+        if (this.state.activeTab !== tab) {
+            this.resetPaymentChoices();
+
+            let payment = this.state.payment;
+            if(tab === '1') 
+            {
+                payment.useOnline = false;
+                payment.fromOnline = 0.00;
+            }
+            else if(tab === '2') {
+                payment.useOnline = true;
+                payment.fromOnline = this.state.selected_flight ? this.state.selected_flight.pricing.totalPerPAX : 0.00;
+            }
+
+            this.setState({
+                activeTab: tab,
+                payment : payment
+            });
+        }
+    }    
     //End of Events
+
+    resetPaymentChoices() {
+        let payment = this.state.payment;
+        payment.fromCredit = 0.00;
+        payment.useCredit = false;
+        payment.fromWallet = 0.00;
+        payment.useWallet = false;
+        payment.fromOnline = 0.00;
+        payment.useOnline = false;
+
+        this.setState({
+            payment: payment
+        });
+    }
 
     getHeader(stepnumber) {
         return (
@@ -545,12 +631,35 @@ class FlightBooking extends Component {
                             <span className="currency-text">₹ {total_price}</span>
                         </Col>
                     </Row>
+                    
+                    { this.state.payment && this.state.payment.useWallet && this.state.payment.fromWallet>0 ?
+                    <Row>
+                        <Col xs="12" sm="12" md={{size: 7}}>
+                            <span className="field-title">Pay from wallet</span>
+                        </Col>
+                        <Col xs="12" sm="12" md={{size: 5}} className="text-right">
+                            <span className="currency-text">₹ {this.state.payment.fromWallet}</span>
+                        </Col>
+                    </Row>
+                    : null }
+
+                    {this.state.payment && this.state.payment.useCredit && this.state.currentUser.allowCredit && this.state.payment.fromCredit>0 ?
+                    <Row>
+                        <Col xs="12" sm="12" md={{size: 7}}>
+                            <span className="field-title">Pay by credit limit</span>
+                        </Col>
+                        <Col xs="12" sm="12" md={{size: 5}} className="text-right">
+                            <span className="currency-text">₹ {this.state.payment.fromCredit}</span>
+                        </Col>
+                    </Row>
+                    : null }
                 </div>
             </div>
         );
     }
 
     handleInputChange(event, objectType, fieldName, objectIndex) {
+        const payment = this.state.payment;
         const passengers = this.state.passengers;
         const target = event.target;
         const isMoment = event._isAMomentObject;
@@ -564,8 +673,46 @@ class FlightBooking extends Component {
             passengers.infants[objectIndex][fieldName] = value;
         else if(objectType === 'contactDetails')
             passengers.contactDetails[fieldName] = value;
+        else if(objectType === 'payment') {
+            payment['billedAmount'] = this.state.selected_flight.pricing.totalPerPAX;
+            payment[fieldName] = value;
+            if(fieldName === 'useWallet') {
+                if(value) {
+                    payment['fromWallet'] = this.state.selected_flight.pricing.totalPerPAX > this.state.currentUser.wallet.balance ? this.state.currentUser.wallet.balance : this.state.selected_flight.pricing.totalPerPAX;
+                }
+                else {
+                    payment['fromWallet'] = 0.00;
+                }
+                payment['fromCredit'] = this.state.currentUser.allowCredit && ((payment['billedAmount'] - payment['fromWallet'])<=this.state.currentUser.creditLimit || this.state.currentUser.creditLimit<=0) ? (payment['billedAmount'] - payment['fromWallet']) : 0.00;
+                payment['useCredit'] = payment['fromCredit'] > 0;
+            }
+            else if(fieldName === 'useCredit') {
+                if(value) {
+                    //payment['fromCredit'] = this.state.currentUser.allowCredit && ((payment['billedAmount'] - payment['fromWallet'])<=this.state.currentUser.creditLimit || this.state.currentUser.creditLimit<=0) ? (payment['billedAmount'] - payment['fromWallet']) : 0.00;
+                    payment['fromCredit'] = this.state.currentUser.allowCredit && (payment['billedAmount'] <= this.state.currentUser.creditLimit || this.state.currentUser.creditLimit <= 0) ? payment['billedAmount'] : 0.00;
+                    payment['fromWallet'] = (payment['billedAmount'] - payment['fromCredit']) >= this.state.currentUser.wallet.balance ? this.state.currentUser.wallet.balance : (payment['billedAmount'] - payment['fromCredit']);
+                }
+                else {
+                    payment['fromCredit'] = 0.00
+                    payment['fromWallet'] = (payment['billedAmount'] - payment['fromCredit']) >= this.state.currentUser.wallet.balance ? this.state.currentUser.wallet.balance : (payment['billedAmount'] - payment['fromCredit']);
+                    //payment['fromWallet'] = this.state.selected_flight.pricing.totalPerPAX > this.state.currentUser.wallet.balance ? this.state.currentUser.wallet.balance : this.state.selected_flight.pricing.totalPerPAX;
+                    //payment['fromCredit'] = this.state.currentUser.allowCredit && ((payment['billedAmount'] - payment['fromWallet'])<=this.state.currentUser.creditLimit || this.state.currentUser.creditLimit<=0) ? (payment['billedAmount'] - payment['fromWallet']) : 0.00;
+                }
+                payment['useWallet'] = payment['fromWallet'] > 0;
 
-        this.setState({passengers});
+                payment['useCredit'] = payment['fromCredit'] > 0;
+                if(value && payment['fromCredit'] < (payment['billedAmount'] - payment['fromWallet'])) {
+                    this.props.CommonStore.setAlert('Warning!', 'Either you are not allowed for credit or already exhausted all your credit', true, true);
+                }
+            }
+        }
+
+        if(objectType === 'payment') {
+            this.setState({payment});
+        }
+        else {
+            this.setState({passengers});
+        }
     }
 
     getAdultPassengerSection(adultIndex) {
@@ -1050,6 +1197,106 @@ class FlightBooking extends Component {
         );
     }
 
+    getPayByWalletSection() {
+        console.log(JSON.stringify(this.state.currentUser));
+
+
+        return (
+            <div className="payment-choices">
+                <Card>
+                    <CardBody>
+                        <Row>
+                            <Col xs="12" sm="12" md={{size: 12}} className="">
+                                <InputGroup>
+                                    <InputGroupAddon addonType="prepend">
+                                        <InputGroupText><i className="fa fa-money" aria-hidden="true"></i></InputGroupText>
+                                    </InputGroupAddon>
+                                    <Switch id={`wallet-0`} name={`wallet-0`} value={this.state.payment.useWallet} onChange={(ev) => this.handleInputChange(ev, 'payment','useWallet',-1)}>&nbsp;Use Wallet to pay [Balance : <i className="fa fa-inr" aria-hidden="true"></i>&nbsp;{this.state.wallet.balance}]</Switch>
+                                </InputGroup>
+                            </Col>
+                        </Row>
+                    </CardBody>
+                </Card>
+                <Card>
+                    <CardBody>
+                        <Row>
+                        {this.state.currentUser.allowCredit ? 
+                            <Col xs="12" sm="12" md={{size: 12}} className="">
+                                <InputGroup>
+                                    <InputGroupAddon addonType="prepend">
+                                        <InputGroupText><i className="fa fa-money" aria-hidden="true"></i></InputGroupText>
+                                    </InputGroupAddon>
+                                    <Switch id={`wallet-1`} name={`wallet-1`} value={this.state.payment.useCredit} onChange={(ev) => this.handleInputChange(ev, 'payment','useCredit',-1)}>&nbsp;Use Credit Limit to pay [Cr.Limit : {this.state.currentUser.allowCredit ? (this.state.currentUser.creditLimit <= 0 ? 'No Limit' : `₹ ${this.state.currentUser.creditLimit}`) : 'NA'}]</Switch>
+                                </InputGroup>
+                            </Col>
+                        : null }
+                        </Row>
+                    </CardBody>
+                </Card>
+            </div>
+
+            // <>
+            //     <div>Wallet balance: {this.state.currentUser.wallet ? this.state.currentUser.wallet.balance : 0.00}</div>
+            //     <div>Credit allowed: {this.state.currentUser.allowCredit? 'Yes' : 'No'}</div>
+            //     <div>Credit limit: {this.state.currentUser.creditLimit}</div>
+            // </>
+        )
+    }
+
+    getPaymentInfo(flight) {
+        const PayByWallet = this.getPayByWalletSection();
+
+        return (
+            <div id="selected-ticket-payment-section">
+                <div className="booking-header">
+                    <h3 className="apt-heading">
+                        <span>Payments</span>
+                    </h3>
+                    <div className="booking-header-right" onClick={(ev) => this.RedirectToSearch(ev)}>
+                        <Button outline color="primary" className="asr-book">
+                            <i className="fa fa-angle-double-left"></i>&nbsp;<span>Back to Search</span>
+                        </Button>
+                    </div>
+                </div>
+                <div className="scrollable wrapper-payment-mainclass">
+                    <div className="payment-section">
+                        <Row className="no-margin">
+                            <Col xs="6" sm="4" md="3" className="tab-section no-padding">
+                                <Nav tabs vertical pills>
+                                    <NavItem>
+                                        <NavLink className={classnames({active: this.state.activeTab === '1'})} onClick={() => { this.toggleTab('1'); }}>
+                                            Pay from wallet
+                                        </NavLink>
+                                    </NavItem>
+                                    <NavItem>
+                                        <NavLink className={classnames({active: this.state.activeTab === '2'})} onClick={() => {this.toggleTab('2'); }}>
+                                            Pay online
+                                        </NavLink>
+                                    </NavItem>
+                                </Nav>
+                            </Col>
+                            <Col xs="6" sm="6" md="9">
+                                <TabContent activeTab={this.state.activeTab}>
+                                    <TabPane tabId="1">
+                                        <div className="bookbypay-section">
+                                            <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span><span className="disclaimer">Please Note:</span> You may be redirected to bank page to complete your transaction. By making this booking, you agree to our Terms of Use and Privacy Policy</span>                                            
+                                        </div>
+                                        {PayByWallet}
+                                    </TabPane>
+                                    <TabPane tabId="2">
+                                        <div className="bookbypay-section">
+                                            <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span><span className="disclaimer">Please Note:</span> You may be redirected to bank page to complete your transaction. By making this booking, you agree to our Terms of Use and Privacy Policy</span>
+                                        </div>
+                                    </TabPane>
+                                </TabContent>
+                            </Col>
+                        </Row>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     getFirstStepView() {
         const FlightDetails = this.getFlightInfo(this.state.selected_flight);
         const PricingInfo = this.getFlightPricingInfo(this.state.selected_flight);
@@ -1101,12 +1348,52 @@ class FlightBooking extends Component {
         )
     }
 
-    /* <FlightItem flight={flight}></FlightItem> */
+    getFinalStepView() {
+        const PaymentInfo = this.getPaymentInfo(this.state.selected_flight);
+        const PricingInfo = this.getFlightPricingInfo(this.state.selected_flight);
+
+        return (
+            <Row>
+                <Col xs="12" sm="12" md={{size: 9}} className="no-padding-right">
+                    {PaymentInfo}
+                </Col>
+                <Col xs="12" sm="12" md={{size: 3}} className="no-padding-left">
+                    {PricingInfo}
+                </Col>
+            </Row>
+        )
+    }
+
     render() {
         console.log(`Is processing ? => ${this.props.UserStore.SearchResult_Flights.processing}`);
         const Header = this.getHeader(this.state.step);
+        let StepView = null;
 
-        const StepView = (this.state.step === 1 ? this.getFirstStepView() : (this.state.step === 2 ? this.getSecondStepView() : (this.state.step === 3 ? this.getThirdStepView() : null)));
+        //const StepView = (this.state.step === 1 ? this.getFirstStepView() : (this.state.step === 2 ? this.getSecondStepView() : (this.state.step === 3 ? this.getThirdStepView() : (this.state.step === 3 ? this.getThirdStepView() : null))));
+        if(!this.state.selected_flight) {
+            this.setState({
+                step: 4
+            });
+
+            this.BackToFlightSearch(null, this.props.UserStore.SearchResult_Flights.payload);
+        }
+
+        switch (this.state.step) {
+            case 1:
+                StepView = this.getFirstStepView();
+                break;
+            case 2:
+                StepView = this.getSecondStepView();
+                break;
+            case 3:
+                StepView = this.getThirdStepView();
+                break;
+            case 4:
+                StepView = this.getFinalStepView();
+                break;
+            default:
+                break;
+        }
 
         //console.log(`Final Group Result: ${newFlightList}`);
 
