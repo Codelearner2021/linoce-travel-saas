@@ -4,7 +4,8 @@
     scroll-behavior: smooth;
     overflow-y: scroll; */
     margin: auto;
-    margin-top: 80px;
+    /* margin-top: 80px; */
+    margin-top: 2.7rem;
 }
 .apt-section {
     padding: 15px 0;
@@ -129,7 +130,7 @@
     background-color: #f2f2f2;
     padding: 5px 10px;
     border-right: 2px solid #333;
-    min-height: 500px;
+    /* min-height: 500px; */
 }
 #booking-financial-section {
     background-color: #f2f2f2;
@@ -144,12 +145,33 @@
     padding-right: 0px !important;
     padding-left: 0px !important;
 }
-.no-padding-right {
-    padding-right: 0px !important;
+
+@media (min-width: 786px) {
+    .no-padding-right {
+        padding-right: 0px !important;
+    }
+    .no-padding-left {
+        padding-left: 0px !important;
+    }
 }
-.no-padding-left {
-    padding-left: 0px !important;
+
+@media (max-width: 785px) {
+    .no-padding-right {
+        padding-right: .5rem !important;
+        padding-left: .5rem !important;
+    }
+    .no-padding-left {
+        padding-left: .5rem !important;
+        padding-right: .5rem !important;
+    }
+    #selected-ticket-section {
+        border-right: none !important;
+    }
+    #passenger-section {
+        border-right: none !important;
+    }
 }
+
 .booking-header {
     display: flex;
     align-items: center;
@@ -159,6 +181,7 @@
 .apt-heading {
     margin-top: 0;
     margin-bottom: 0px;
+    font-size: 1.2rem;
 }
 .booking-header-right {
     display: flex;
@@ -169,6 +192,7 @@
     box-shadow: 0 1px 5px 0 rgb(0 0 0 / 10%);
     padding: 10px;
     border-radius: 6px;
+    background-color: #fff;
 }
 .scrollable {
     position: relative;
@@ -227,9 +251,14 @@
     width: 40%;
 }
 .apt-namelist {
-    font-size: 12pt;
+    font-size: 13px;
     font-family: monospace;
     color: #2436b9;    
+}
+@media screen and (max-width: 786px) {
+    .apt-namelist {
+        font-size: .65rem;
+    }
 }
 .apt-namelist li {
     display: inline-block;
@@ -266,10 +295,22 @@
     margin-top: 2px;
     display: block;
 }
+@media screen and (max-width: 786px) {
+    .flight-arrow-itinenry-page {
+        width: 90%;
+    }
+}
 .apt-lasthour {
     /* font-weight: bold; */
     color: #2436b9;
     font-size: 10pt;
+}
+@media screen and (max-width: 786px) {
+    .apt-lasthour {
+        font-size: .75rem !important;
+        margin-top: 12px;
+        float: right;
+    }
 }
 .apt-stopcount, .apt-classname {
     display: grid;
@@ -372,7 +413,7 @@
     background-color: #f2f2f2;
     padding: 5px 10px;
     border-right: 2px solid #333;
-    min-height: 700px;
+    /* min-height: 700px; */
 }
 .bk-section-heading {
     cursor: pointer;
@@ -402,7 +443,7 @@
     color:#666;
 }
 .bottom-border {
-    border-bottom: 2px solid #a7a4a4;
+    border-bottom: 1px solid #a7a4a4;
 }
 .aux-value-wheelchair {
     font-size: 13px;
@@ -441,6 +482,7 @@
 }
 .passenger-item-info {
     line-height: 1.2;
+    margin: 10px 0px 5px 0px;
 }
 .passenger-contact-section {
     margin: 20px 0px 20px 0px;
@@ -496,8 +538,23 @@
 .bookbypay-section .disclaimer {
     color: #ff0000;
 }
-
-
+@media (max-width: 785px) {
+    .asr-book, .asr-viewbtn {
+        font-size: .8rem !important;
+    }
+}
 .payment-choices {
     font-size: 13px !important;
+}
+/*.payment-choices .row {
+    margin: 0px 0px 10px 0px;
+}*/
+.input-group-prepend {
+    width: 2.5rem !important;
+}
+.section-title {
+    font-size: .9rem !important;
+}
+.payment-choices .card-body {
+    padding: 0.5rem;
 }

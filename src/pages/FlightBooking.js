@@ -14,6 +14,8 @@ import { toJS, reaction } from 'mobx';
 import { withRouter } from "react-router-dom";
 import { observer, inject } from 'mobx-react';
 
+import PayuMoney from "../components/custom_components/pg_payumoney/PayuMoney";
+
 var moment = require('moment');
 
 const camel2title = (text) => {
@@ -44,6 +46,8 @@ class FlightBooking extends Component {
         super(props);
 
         this.formRef = React.createRef();
+        this.pref = React.createRef();
+
         this.disablePastDt = this.disablePastDt.bind(this);
         this.toggleTab = this.toggleTab.bind(this);
 
@@ -134,6 +138,7 @@ class FlightBooking extends Component {
                 useOnline: false,
                 fromOnline: 0.00
             },
+            paymentInfo: {status: ''},
             step: 1,
             activeTab: '1'
         }
@@ -316,8 +321,115 @@ class FlightBooking extends Component {
                 payment : payment
             });
         }
-    }    
+    }
+
+    async ProcessPaymentOnline(event) {
+        let paymentProcessingData = {
+            ticket: toJS(this.state.selected_flight),
+            payment: toJS(this.state.payment),
+            passengers: toJS(this.state.passengers)
+        }
+        console.log(`Payment Processing Data ${JSON.stringify(paymentProcessingData)}`);
+
+        let payment_data = await this.props.UserStore.initiatePaymentProcessingOnline(paymentProcessingData)
+        .then(response => {
+            console.log(`Payment Info : ${JSON.stringify(response)}`);
+            this.setState({paymentInfo: response});
+            
+            console.log(`Initiating payment ...`);
+            this.pref.current.processPayment(response);
+            this.retryOnlinePaymentStatus = 0;
+
+            if(response.transactionId) {
+                this.timeoutHandler = setTimeout((traceid) => {
+                    this.checkOnlinePaymentStatus(traceid);
+                }, 2000, response.transactionId);
+            }
+
+            return response;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
+
+    async BookNow(event) {
+        let paymentProcessingData = {
+            ticket: toJS(this.state.selected_flight),
+            payment: toJS(this.state.payment),
+            passengers: toJS(this.state.passengers)
+        }
+        console.log(`Payment Processing Data ${JSON.stringify(paymentProcessingData)}`);
+
+        //this os the place to call book now api
+        this.props.CommonStore.setAlert('Information!', 'We are about to book your ticket', true, false);
+
+        // this.props.history.push({
+        //     pathname: '/search/flight',
+        //     state: {payload : toJS(searchPayload)}
+        // });
+
+        let payment_data = await this.props.UserStore.initiatePaymentProcessingOnline(paymentProcessingData)
+        .then(response => {
+            console.log(`Payment Info : ${JSON.stringify(response)}`);
+            this.setState({paymentInfo: response});
+            
+            console.log(`Initiating payment ...`);
+            this.pref.current.processPayment(response);
+            this.retryOnlinePaymentStatus = 0;
+
+            if(response.transactionId) {
+                this.timeoutHandler = setTimeout((traceid) => {
+                    this.checkOnlinePaymentStatus(traceid);
+                }, 2000, response.transactionId);
+            }
+
+            return response;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
     //End of Events
+
+    async checkOnlinePaymentStatus(traceid) {
+        let payment_data = await this.props.UserStore.getOnlinePaymentStatus(traceid)
+        .then(response => {
+            console.log(`Payment Info : ${JSON.stringify(response)}`);
+            if(response.status !== '') {
+                clearTimeout(this.timeoutHandler);
+                let paymentInfo = this.state.paymentInfo;
+                paymentInfo.status = response.status;
+                paymentInfo.flag = response.flag;
+                paymentInfo.pgTransactionId = response.paymentGatewayTransId;
+                paymentInfo.bankTransId = response.bankTransId;
+                paymentInfo.bankName = response.bankName;
+                paymentInfo.walletTransactionId = response.walletTransactionId;
+                paymentInfo.booking = response.booking;
+    
+                this.setState({paymentInfo: paymentInfo});
+                
+                console.log(`Payment stauts : ${paymentInfo.status} | Booking Id : ${paymentInfo.booking ? paymentInfo.booking.id : -1}`);
+
+                this.pref.current.processComplete(paymentInfo.status);
+            }
+            else {
+                if(this.retryOnlinePaymentStatus > 1000) {
+                    clearTimeout(this.timeoutHandler);
+                }
+                else {
+                    this.retryOnlinePaymentStatus++;
+                    this.timeoutHandler = setTimeout((traceid) => {
+                        this.checkOnlinePaymentStatus(traceid);
+                    }, 500, traceid);
+                }
+            }
+            return response;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
 
     resetPaymentChoices() {
         let payment = this.state.payment;
@@ -593,11 +705,13 @@ class FlightBooking extends Component {
     }
 
     getFlightPricingInfo(flight) {
-        let adult_price = parseFloat(flight.pricing.basePrice) * (parseInt(flight.pricing.adultPAX) + parseInt(flight.pricing.childPAX));
+        let pax = (parseInt(flight.pricing.adultPAX) + parseInt(flight.pricing.childPAX));
+        let adult_price = parseFloat(flight.pricing.basePrice) * pax;
         //console.log(`Infant pricing : ${parseFloat(flight.pricing.infantBasePrice)} | Infant PAX : ${flight.pricing.infantPAX}`);
         let infant_price = (parseFloat(flight.pricing.infantBasePrice)) * (parseInt(flight.pricing.infantPAX));
 
-        let adult_taxes = (flight.pricing.markup + flight.pricing.serviceCharge + flight.pricing.tax - flight.pricing.discount) * (parseInt(flight.pricing.adultPAX) + parseInt(flight.pricing.childPAX));
+        let adult_markup = parseFloat(flight.pricing.markup) * pax;
+        let adult_taxes = (flight.pricing.serviceCharge + flight.pricing.tax - flight.pricing.discount) * (parseInt(flight.pricing.adultPAX) + parseInt(flight.pricing.childPAX));
 
         let total_price = flight.pricing.totalPerPAX;
 
@@ -608,36 +722,36 @@ class FlightBooking extends Component {
                 <div className="pricing-container">
                     <h4 className="graycolor">FARE SUMMARY</h4>
                     <Row>
-                        <Col xs="12" sm="12" md={{size: 7}}>
+                        <Col xs="7" sm="7" md={{size: 7}}>
                             <span className="field-title">Base fare</span>
                         </Col>
-                        <Col xs="12" sm="12" md={{size: 5}} className="text-right">
-                            <span className="currency-text">₹ {adult_price + infant_price}</span>
+                        <Col xs="5" sm="5" md={{size: 5}} className="text-right">
+                            <span className="currency-text">₹ {adult_price + infant_price + adult_markup}</span>
                         </Col>
                     </Row>
                     <Row>
-                        <Col xs="12" sm="12" md={{size: 7}}>
+                        <Col xs="7" sm="7" md={{size: 7}}>
                             <span className="field-title">Taxes &amp; fees</span>
                         </Col>
-                        <Col xs="12" sm="12" md={{size: 5}} className="text-right">
+                        <Col xs="5" sm="5" md={{size: 5}} className="text-right">
                             <span className="currency-text">₹ {adult_taxes}</span>
                         </Col>
                     </Row>
                     <Row>
-                        <Col xs="12" sm="12" md={{size: 7}}>
+                        <Col xs="7" sm="7" md={{size: 7}}>
                             <span className="field-title">Amount to Pay</span>
                         </Col>
-                        <Col xs="12" sm="12" md={{size: 5}} className="text-right">
+                        <Col xs="5" sm="5" md={{size: 5}} className="text-right">
                             <span className="currency-text">₹ {total_price}</span>
                         </Col>
                     </Row>
                     
                     { this.state.payment && this.state.payment.useWallet && this.state.payment.fromWallet>0 ?
                     <Row>
-                        <Col xs="12" sm="12" md={{size: 7}}>
+                        <Col xs="7" sm="7" md={{size: 7}}>
                             <span className="field-title">Pay from wallet</span>
                         </Col>
-                        <Col xs="12" sm="12" md={{size: 5}} className="text-right">
+                        <Col xs="5" sm="5" md={{size: 5}} className="text-right">
                             <span className="currency-text">₹ {this.state.payment.fromWallet}</span>
                         </Col>
                     </Row>
@@ -645,10 +759,10 @@ class FlightBooking extends Component {
 
                     {this.state.payment && this.state.payment.useCredit && this.state.currentUser.allowCredit && this.state.payment.fromCredit>0 ?
                     <Row>
-                        <Col xs="12" sm="12" md={{size: 7}}>
+                        <Col xs="7" sm="7" md={{size: 7}}>
                             <span className="field-title">Pay by credit limit</span>
                         </Col>
-                        <Col xs="12" sm="12" md={{size: 5}} className="text-right">
+                        <Col xs="5" sm="5" md={{size: 5}} className="text-right">
                             <span className="currency-text">₹ {this.state.payment.fromCredit}</span>
                         </Col>
                     </Row>
@@ -719,7 +833,7 @@ class FlightBooking extends Component {
         return (
             <div key={`adultkey-${adultIndex}`} className="bk-passenger-section">
                 <div className="bk-section-heading pax-box-arrow" onClick={(ev) => this.toggleSection(ev, 'adult', adultIndex)}>
-                    <h5>
+                    <h5 className="section-title">
                         <span>Adult {`${adultIndex+1} : ${this.state.passengers.adults[adultIndex].title} ${this.state.passengers.adults[adultIndex].firstName} ${this.state.passengers.adults[adultIndex].lastName}`}</span>: (12 + yrs)
                         <span className="pull-right paxdetails-accordian-arrow">
                             <i className={this.state.passengers.adults[adultIndex].expanded ? 'fa fa-angle-down' : 'fa fa-angle-up'}/>
@@ -776,7 +890,7 @@ class FlightBooking extends Component {
         return (
             <div key={`childkey-${childIndex}`} className="bk-passenger-section">
                 <div className="bk-section-heading pax-box-arrow" onClick={(ev) => this.toggleSection(ev, 'child', childIndex)}>
-                    <h5>
+                    <h5 className="section-title">
                         <span>Child {`${childIndex+1} : ${this.state.passengers.childs[childIndex].title} ${this.state.passengers.childs[childIndex].firstName} ${this.state.passengers.childs[childIndex].lastName}`}</span>: (2 + yrs)
                         <span className="pull-right paxdetails-accordian-arrow">
                             <i className={this.state.passengers.childs[childIndex].expanded ? 'fa fa-angle-down' : 'fa fa-angle-up'}/>
@@ -832,7 +946,7 @@ class FlightBooking extends Component {
         return (
             <div key={`infantkey-${infantIndex}`} className="bk-passenger-section">
                 <div className="bk-section-heading pax-box-arrow" onClick={(ev) => this.toggleSection(ev, 'infant', infantIndex)}>
-                    <h5>
+                    <h5 className="section-title">
                         <span>Infant {`${infantIndex+1} : ${this.state.passengers.infants[infantIndex].title} ${this.state.passengers.infants[infantIndex].firstName} ${this.state.passengers.infants[infantIndex].lastName}`}</span>: (0 - 2 yrs)
                         <span className="pull-right paxdetails-accordian-arrow">
                             <i className={this.state.passengers.infants[infantIndex].expanded ? 'fa fa-angle-down' : 'fa fa-angle-up'}/>
@@ -880,7 +994,7 @@ class FlightBooking extends Component {
         return (
             <div key={`contactkey-0`} className="bk-passenger-section">
                 <div className="bk-section-heading pax-box-arrow" onClick={(ev) => this.toggleSection(ev, 'contactDetails', -1)}>
-                    <h5>
+                    <h5 className="section-title">
                         <span>Contact Details : <i className="fa fa-mobile" aria-hidden="true"></i>&nbsp;{this.state.passengers.contactDetails.mobile} | <i className="fa fa-envelope-o" aria-hidden="true"></i>&nbsp;{this.state.passengers.contactDetails.email}</span>
                         <span className="pull-right paxdetails-accordian-arrow">
                             <i className={this.state.passengers.contactDetails.expanded ? 'fa fa-angle-down' : 'fa fa-angle-up'}/>
@@ -1035,12 +1149,12 @@ class FlightBooking extends Component {
 
         return (
             <Row className="desktop-bookback">
-                <Col xs="12" sm="4" md={{size: 6}} className="">
+                <Col xs="6" sm="4" md={{size: 6}} className="">
                     <Button outline color="primary" className="asr-book" onClick={(ev) => this.BackToFlightSearch(ev, this.props.UserStore.SearchResult_Flights.payload)}>
                         <i className="fa fa-angle-double-left"></i>&nbsp;<span>Back</span>
                     </Button>
                 </Col>
-                <Col xs="12" sm="8" md={{size: 6}} className="text-right confirming--button-price">
+                <Col xs="6" sm="8" md={{size: 6}} className="text-right confirming--button-price">
                     <Button outline color="primary" className="asr-book" disabled={this.props.UserStore.SearchResult_Flights.processing} onClick={(ev) => this.MoveNext(ev)}>
                         {!this.props.UserStore.SearchResult_Flights.processing ? 
                             <>
@@ -1200,7 +1314,6 @@ class FlightBooking extends Component {
     getPayByWalletSection() {
         console.log(JSON.stringify(this.state.currentUser));
 
-
         return (
             <div className="payment-choices">
                 <Card>
@@ -1233,18 +1346,65 @@ class FlightBooking extends Component {
                         </Row>
                     </CardBody>
                 </Card>
+                <Card>
+                    <CardBody>
+                        <Row>
+                            <Col xs="12" sm="12" md={{size: 12}} className="">
+                                <Button outline color="primary" className="asr-book" onClick={(ev) => this.BookNow(ev)} disabled={!this.state.payment.useWallet && !this.state.payment.useCredit}>
+                                    <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span>Pay &amp; Book Now ₹{this.state.selected_flight.pricing.totalPerPAX}</span>
+                                </Button>
+                            </Col>
+                        </Row>                
+                    </CardBody>
+                </Card>
             </div>
+        )
+    }
 
-            // <>
-            //     <div>Wallet balance: {this.state.currentUser.wallet ? this.state.currentUser.wallet.balance : 0.00}</div>
-            //     <div>Credit allowed: {this.state.currentUser.allowCredit? 'Yes' : 'No'}</div>
-            //     <div>Credit limit: {this.state.currentUser.creditLimit}</div>
-            // </>
+    getPayByOnlineSection() {
+        console.log(JSON.stringify(this.state.currentUser));
+
+        return (
+            <div className="payment-choices">
+                <Card>
+                    <CardBody>
+                        {(!this.state.paymentInfo.status ||  this.state.paymentInfo.status==='') ? 
+                        <>
+                        <Row>
+                            <Col xs="12" sm="12" md={{size: 12}} className="">
+                                <span><i className="fa fa-inr" aria-hidden="true"></i>&nbsp;{this.state.selected_flight.pricing.totalPerPAX} would be collected online</span>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col xs="12" sm="12" md={{size: 12}} className="">
+                                <Button outline color="primary" className="asr-book" onClick={(ev) => this.ProcessPaymentOnline(ev)}>
+                                    <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span>Pay &amp; Book Now ₹{this.state.selected_flight.pricing.totalPerPAX}</span>
+                                </Button>
+                            </Col>
+                        </Row>
+                        </>
+                        : null }
+                        <Row>
+                            <Col xs="12" sm="12" md={{size: 12}} className="">
+                                <PayuMoney PaymentData={this.state.paymentInfo} ref={this.pref}/>
+                            </Col>
+                        </Row>
+                        {(this.state.paymentInfo.status && this.state.paymentInfo.status!=='') ? 
+                        <Row>
+                            <Col xs="12" sm="12" md={{size: 12}} className="">
+                                Booking # {this.state.paymentInfo.booking.bookingNumber}
+                            </Col>
+                        </Row>
+                        : null }
+                    </CardBody>
+                </Card>
+            </div>
         )
     }
 
     getPaymentInfo(flight) {
         const PayByWallet = this.getPayByWalletSection();
+        const PayByOnline = this.getPayByOnlineSection();
 
         return (
             <div id="selected-ticket-payment-section">
@@ -1287,6 +1447,7 @@ class FlightBooking extends Component {
                                         <div className="bookbypay-section">
                                             <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span><span className="disclaimer">Please Note:</span> You may be redirected to bank page to complete your transaction. By making this booking, you agree to our Terms of Use and Privacy Policy</span>
                                         </div>
+                                        {PayByOnline}
                                     </TabPane>
                                 </TabContent>
                             </Col>

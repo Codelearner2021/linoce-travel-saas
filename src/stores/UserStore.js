@@ -56,7 +56,10 @@ class UserStore {
         result: [],
         search_traceid: null,
         price_changed: false,
-        updatedFlight: null
+        updatedFlight: null,
+        paymentInfo: null,
+        selected_flight: null,
+        paymentStatus: null
     };
 
     constructor() {
@@ -200,6 +203,19 @@ class UserStore {
         });
     }
 
+    getFlightById(id) {
+        let flights = this.SearchResult_Flights.result;
+        let flight = null;
+        for (let index = 0; index < flights.length; index++) {
+            flight = flights[index];
+            if(flight.id === id) {
+                break;
+            }
+        }
+
+        return flight;
+    }
+
     async getFareRule(id) {
         let token = localStorage.getItem('token');
         if(!token) return null;
@@ -257,6 +273,10 @@ class UserStore {
         if(!token) return null;
 
         this.SearchResult_Flights.search_traceid = localStorage.getItem('traceid');
+        // let flight = this.getFlightById(id);
+        
+        // if(flight)
+        //     this.SearchResult_Flights.selected_flight = flight;
 
         runInAction(() => {
             this.SearchResult_Flights.processing_suspended = true;
@@ -272,12 +292,27 @@ class UserStore {
         
                 //console.log(JSON.stringify(result));
                 if(result && result.data) {
-                    //insert/update the traceid to localStorage
-                    this.SearchResult_Flights.traceId = result.data.traceId;
-                    this.SearchResult_Flights.price_changed = result.data.priceChanged;
+                    let resultData = result.data;
+                    let quotedFlight = resultData.updatedFlightTicket;
+                    if(this.SearchResult_Flights.result && this.SearchResult_Flights.result.length>0) {
+                        for (let index = 0; index < this.SearchResult_Flights.result.length; index++) {
+                            let flightItem = this.SearchResult_Flights.result[index];
+                            if(flightItem.id === quotedFlight.id) {
+                                this.SearchResult_Flights.result[index] = quotedFlight;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        this.SearchResult_Flights.result = [quotedFlight];
+                    }
+                //insert/update the traceid to localStorage
+                    this.SearchResult_Flights.traceId = resultData.traceId;
+                    this.SearchResult_Flights.price_changed = resultData.priceChanged;
                     //console.log(JSON.stringify(result.data));
                     runInAction(() => {
-                        this.SearchResult_Flights.updatedFlight = result.data.updatedFlightTicket;
+                        this.SearchResult_Flights.updatedFlight = quotedFlight;
+                        this.SearchResult_Flights.selected_flight = quotedFlight;
                         this.SearchResult_Flights.processing = false;
                         this.SearchResult_Flights.processing_suspended = false;
         
@@ -317,6 +352,59 @@ class UserStore {
                 this.User = user;
 
                 console.log(`User => ${JSON.stringify(this.User)}`);
+            });
+
+            return result.data;
+        }
+        else {
+            return result;
+        }
+    }
+
+    async initiatePaymentProcessingOnline(paymentProcessingData) {
+        let paymentData = {
+            cacheKey: this.SearchResult_Flights.traceId,
+            ticketTraceId: this.SearchResult_Flights.selected_flight.traceId, //paymentProcessingData.ticket.traceId,
+            paymentInfo: paymentProcessingData.payment,
+            passengers: paymentProcessingData.passengers
+        } //paymentProcessingData || { ticket: {}, payment: {}, passengers: {}};
+
+        let token = localStorage.getItem('token');
+        if(!token) return null;
+
+        var result = await this.userService.useToken(token).initiatePaymentProcessingOnline(paymentData);
+
+        console.log(JSON.stringify(result));
+        if(result && result.data) {
+            console.log(JSON.stringify(result.data));
+            runInAction(() => {
+                let paymentInfo = result.data;
+                this.paymentInfo = paymentInfo;
+
+                console.log(`Payment Info => ${JSON.stringify(this.paymentInfo)}`);
+            });
+
+            return result.data;
+        }
+        else {
+            return result;
+        }
+    }
+
+    async getOnlinePaymentStatus(transactionId) {
+        let token = localStorage.getItem('token');
+        if(!token) return null;
+
+        var result = await this.userService.useToken(token).getOnlinePaymentStatus(transactionId);
+
+        console.log(JSON.stringify(result));
+        if(result && result.data) {
+            console.log(JSON.stringify(result.data));
+            runInAction(() => {
+                let paymentInfo = result.data;
+                this.paymentStatus = paymentInfo;
+
+                console.log(`Payment Info => ${JSON.stringify(this.paymentInfo)}`);
             });
 
             return result.data;

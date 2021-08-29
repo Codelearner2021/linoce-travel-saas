@@ -16,7 +16,10 @@ import FlightSearch from "./pages/FlightSearch";
 import FlightBooking from "./pages/FlightBooking";
 import axios from 'axios';
 import ErrorPage from "./components/ErrorPage";
-import { Alert } from 'reactstrap';
+//import { Alert } from 'reactstrap';
+import { ToastContainer } from 'react-toastify';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 require('dotenv').config();
 
@@ -122,13 +125,14 @@ class App extends Component {
   }
 
   render() {
-    const AlertControl = ({title, msg, visible, onToggle, isErrorAlert}) => (
+    const AlertControl = ({title, msg, visible, onToggle, isErrorAlert, timeout}) => (
       <div className="themed-container container-fluid">
         <div className="alert-container">
-          <Alert color={isErrorAlert ? "danger" : "success"} isOpen={visible} toggle={onToggle} fade={true}>
+          <ToastContainer autoClose={timeout}/>
+          {/* <Alert color={isErrorAlert ? "danger" : "success"} isOpen={visible} toggle={onToggle} fade={true}>
               <h4 className="alert-heading">{title}</h4>
               <p>{msg}</p>
-          </Alert>
+          </Alert> */}
         </div>
       </div>
     )
@@ -142,7 +146,10 @@ class App extends Component {
       return (
         <div className="App">
           <NavbarMain />
-          <AlertControl title={this.props.CommonStore.Alert.title} msg={this.props.CommonStore.Alert.message} visible={this.props.CommonStore.Alert.visible} onToggle={this.onDismiss} isErrorAlert={this.props.CommonStore.Alert.isError} />
+          <ToastContainer autoClose={this.props.CommonStore.Alert.timeout}/>
+          {/* this.props.CommonStore.Alert.timeout
+          <AlertControl title={this.props.CommonStore.Alert.title} msg={this.props.CommonStore.Alert.message} visible={this.props.CommonStore.Alert.visible} onToggle={this.onDismiss} 
+                  isErrorAlert={this.props.CommonStore.Alert.isError} timeout={this.props.CommonStore.Alert.timeout} /> */}
           {/* <AlertControl title="Testing header" msg="Testing message" visible={true} onToggle={this.onDismiss} isErrorAlert={false} /> */}
           <Route exact path="/">
             {/* <Home/> */}

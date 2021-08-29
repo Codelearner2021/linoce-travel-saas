@@ -1,7 +1,13 @@
-import { makeAutoObservable, decorate, observable, computed, action, extendObservable, runInAction } from 'mobx';
+import React, { Component } from "react";
+import { Collapse, Container, TabContent, TabPane, Nav, NavItem, NavLink, Card, CardBody, CardImg, Input, InputGroup, InputGroupText, 
+    InputGroupAddon, InputGroupButtonDropdown, Button, CardTitle, CardText, Row, Col, CustomInput, Label } from 'reactstrap';
+import classnames from 'classnames';
+
+import { makeAutoObservable, decorate, observable, computed, action, extendObservable, runInAction, toJS } from 'mobx';
 import CompanyService from '../services/CompanyService';
 import UserService from '../services/UserService';
 import CommonService from '../services/CommonService';
+import { toast } from 'react-toastify';
 
 const ALERT_TIMEOUT = 10000;
 
@@ -22,7 +28,8 @@ class CommonStore {
         title: '',
         message: '',
         visible: false,
-        isError: false
+        isError: false,
+        timeout: ALERT_TIMEOUT
     }
 
     LoggedInUser = {
@@ -98,17 +105,36 @@ class CommonStore {
         }
     }
 
+    // async setAlert(title, message, visible=false, isError=false) {
+    //     this.Alert.isError = isError;
+    //     this.Alert.title = title;
+    //     this.Alert.message = message;
+    //     this.Alert.visible = visible;
+
+    //     if(visible) {
+    //         setTimeout(() => {
+    //             if(this.Alert.visible)
+    //                 this.toggleAlert(false);
+    //         }, ALERT_TIMEOUT);
+    //     }
+    // }
+
     async setAlert(title, message, visible=false, isError=false) {
         this.Alert.isError = isError;
         this.Alert.title = title;
         this.Alert.message = message;
         this.Alert.visible = visible;
+        let alertConfig = {
+            position: toast.POSITION.BOTTOM_CENTER,
+            autoClose: ALERT_TIMEOUT,
+            className: 'alert-message-item'
+        }
 
-        if(visible) {
-            setTimeout(() => {
-                if(this.Alert.visible)
-                    this.toggleAlert(false);
-            }, ALERT_TIMEOUT);
+        if(isError) {
+            toast.error(<AlertMessage alert={{title: this.Alert.title, message: this.Alert.message}}/>, alertConfig);
+        }
+        else {
+            toast.info(<AlertMessage alert={{title: this.Alert.title, message: this.Alert.message}}/>, alertConfig);
         }
     }
 
@@ -116,6 +142,15 @@ class CommonStore {
         this.Alert.visible = show;
     }
 };
+
+export const AlertMessage = (props) => {
+    return (
+        <>
+            <div className="title">{props.alert.title}</div>
+            <span>{props.alert.message}</span>
+        </>
+    )
+}
 
 // decorate(CompanyStore, {
 //     Company: observable,
