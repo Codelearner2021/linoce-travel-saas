@@ -140,7 +140,9 @@ class FlightBooking extends Component {
             },
             paymentInfo: {status: ''},
             step: 1,
-            activeTab: '1'
+            activeTab: '1',
+            booking: null,
+            processing: false
         }
 
         if(!selectedFlight) {
@@ -324,6 +326,8 @@ class FlightBooking extends Component {
     }
 
     async ProcessPaymentOnline(event) {
+        this.setState({processing: true});
+
         let paymentProcessingData = {
             ticket: toJS(this.state.selected_flight),
             payment: toJS(this.state.payment),
@@ -354,35 +358,39 @@ class FlightBooking extends Component {
     }
 
     async BookNow(event) {
+        this.setState({processing: true});
         let paymentProcessingData = {
             ticket: toJS(this.state.selected_flight),
             payment: toJS(this.state.payment),
             passengers: toJS(this.state.passengers)
         }
-        console.log(`Payment Processing Data ${JSON.stringify(paymentProcessingData)}`);
+        console.log(`Booking Processing Data ${JSON.stringify(paymentProcessingData)}`);
 
         //this os the place to call book now api
-        this.props.CommonStore.setAlert('Information!', 'We are about to book your ticket', true, false);
+        //this.props.CommonStore.setAlert('Information!', 'We are about to book your ticket', true, false);
 
         // this.props.history.push({
         //     pathname: '/search/flight',
         //     state: {payload : toJS(searchPayload)}
         // });
 
-        let payment_data = await this.props.UserStore.initiatePaymentProcessingOnline(paymentProcessingData)
+        let payment_data = await this.props.UserStore.initiateBookingProcessing(paymentProcessingData)
         .then(response => {
-            console.log(`Payment Info : ${JSON.stringify(response)}`);
-            this.setState({paymentInfo: response});
-            
-            console.log(`Initiating payment ...`);
-            this.pref.current.processPayment(response);
-            this.retryOnlinePaymentStatus = 0;
+            console.log(`Booking Info : ${JSON.stringify(response)}`);
+            response.booking = (response.booking && response.booking.length>0) ? response.booking[0] : {bookingNumber: ''};
+            let paymentInfo = response;
+            this.setState({paymentInfo: paymentInfo});
+            this.setState({processing: false});
+            this.setState({wallet: response.userWallet});
+            //console.log(`Initiating booking ...`);
+            //this.pref.current.processPayment(response);
+            //this.retryOnlinePaymentStatus = 0;
 
-            if(response.transactionId) {
-                this.timeoutHandler = setTimeout((traceid) => {
-                    this.checkOnlinePaymentStatus(traceid);
-                }, 2000, response.transactionId);
-            }
+            // if(response.transactionId) {
+            //     this.timeoutHandler = setTimeout((traceid) => {
+            //         this.checkOnlinePaymentStatus(traceid);
+            //     }, 2000, response.transactionId);
+            // }
 
             return response;
         })
@@ -408,6 +416,7 @@ class FlightBooking extends Component {
                 paymentInfo.booking = response.booking;
     
                 this.setState({paymentInfo: paymentInfo});
+                this.setState({processing: false});
                 
                 console.log(`Payment stauts : ${paymentInfo.status} | Booking Id : ${paymentInfo.booking ? paymentInfo.booking.id : -1}`);
 
@@ -1346,11 +1355,22 @@ class FlightBooking extends Component {
                         </Row>
                     </CardBody>
                 </Card>
+                {(this.state.paymentInfo.status && this.state.paymentInfo.status!=='') ? 
                 <Card>
                     <CardBody>
                         <Row>
                             <Col xs="12" sm="12" md={{size: 12}} className="">
-                                <Button outline color="primary" className="asr-book" onClick={(ev) => this.BookNow(ev)} disabled={!this.state.payment.useWallet && !this.state.payment.useCredit}>
+                                Booking # {this.state.paymentInfo.booking.bookingNumber}
+                            </Col>
+                        </Row>
+                    </CardBody>
+                </Card>
+                : null }
+                <Card>
+                    <CardBody>
+                        <Row>
+                            <Col xs="12" sm="12" md={{size: 12}} className="">
+                                <Button outline color="primary" className="asr-book" onClick={(ev) => this.BookNow(ev)} disabled={(!this.state.payment.useWallet && !this.state.payment.useCredit) || this.state.processing}>
                                     <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span>Pay &amp; Book Now ₹{this.state.selected_flight.pricing.totalPerPAX}</span>
                                 </Button>
                             </Col>
@@ -1377,7 +1397,7 @@ class FlightBooking extends Component {
                         </Row>
                         <Row>
                             <Col xs="12" sm="12" md={{size: 12}} className="">
-                                <Button outline color="primary" className="asr-book" onClick={(ev) => this.ProcessPaymentOnline(ev)}>
+                                <Button outline color="primary" className="asr-book" onClick={(ev) => this.ProcessPaymentOnline(ev)} disabled={!this.state.payment.useOnline || this.state.processing}>
                                     <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span>Pay &amp; Book Now ₹{this.state.selected_flight.pricing.totalPerPAX}</span>
                                 </Button>
                             </Col>

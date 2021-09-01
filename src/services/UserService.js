@@ -218,6 +218,36 @@ export default class UserService {
         }
     }
 
+    initiateBookingProcessing = async (paymentData) => {
+        const headers = new Headers();
+        if(this.token)
+            headers.append("Authorization", `Bearer ${this.token}`);
+
+        let cacheKey = paymentData.cacheKey;
+        let ticketTraceId = paymentData.ticketTraceId;
+
+        headers.append("Content-Type", "application/json");
+        
+        const url = `${process.env.REACT_APP_API_URL}/v1/user/booking/process/${cacheKey}/${ticketTraceId}`;
+        
+        try
+        {
+            var options = {
+                method: "POST",
+                headers,
+                body: JSON.stringify(paymentData)
+            }
+            const request = await new Request(url, options);
+            const response = await fetch(request);
+
+            console.log(JSON.stringify(response));
+            return response.json();
+        }
+        catch(e) {
+            console.log(e);
+        }
+    }
+
     getOnlinePaymentStatus = async (transactionId) => {
         const headers = new Headers();
         if(this.token)

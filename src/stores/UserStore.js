@@ -59,7 +59,8 @@ class UserStore {
         updatedFlight: null,
         paymentInfo: null,
         selected_flight: null,
-        paymentStatus: null
+        paymentStatus: null,
+        booking: []
     };
 
     constructor() {
@@ -382,6 +383,36 @@ class UserStore {
                 this.paymentInfo = paymentInfo;
 
                 console.log(`Payment Info => ${JSON.stringify(this.paymentInfo)}`);
+            });
+
+            return result.data;
+        }
+        else {
+            return result;
+        }
+    }
+
+    async initiateBookingProcessing(paymentProcessingData) {
+        let paymentData = {
+            cacheKey: this.SearchResult_Flights.traceId,
+            ticketTraceId: this.SearchResult_Flights.selected_flight.traceId, //paymentProcessingData.ticket.traceId,
+            paymentInfo: paymentProcessingData.payment,
+            passengers: paymentProcessingData.passengers
+        } //paymentProcessingData || { ticket: {}, payment: {}, passengers: {}};
+
+        let token = localStorage.getItem('token');
+        if(!token) return null;
+
+        var result = await this.userService.useToken(token).initiateBookingProcessing(paymentData);
+
+        console.log(JSON.stringify(result));
+        if(result && result.data) {
+            console.log(JSON.stringify(result.data));
+            runInAction(() => {
+                let booking = result.data;
+                this.booking = booking;
+
+                console.log(`Booking Info => ${JSON.stringify(this.SearchResult_Flights.booking)}`);
             });
 
             return result.data;
