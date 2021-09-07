@@ -362,6 +362,31 @@ class UserStore {
         }
     }
 
+    async getBookingById(bookingid, chainid) {
+        let token = localStorage.getItem('token');
+        if(!token) return null;
+
+        var result = await this.userService.useToken(token).getBookingById(bookingid, chainid);
+
+        console.log(JSON.stringify(result));
+        if(result && result.data) {
+            console.log(JSON.stringify(result.data));
+            runInAction(() => {
+                let wallet = result.data.userWallet;
+                this.User.wallet = wallet;
+
+                this.SearchResult_Flights.booking = result.data.booking;
+
+                console.log(`User => ${JSON.stringify(this.User)}`);
+            });
+
+            return result.data.booking;
+        }
+        else {
+            return result;
+        }
+    }
+
     async initiatePaymentProcessingOnline(paymentProcessingData) {
         let paymentData = {
             cacheKey: this.SearchResult_Flights.traceId,

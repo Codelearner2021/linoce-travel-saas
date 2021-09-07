@@ -11,6 +11,7 @@ import NavbarMain from "./components/Navbar";
 import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import Tour from "./pages/Tour";
+import TicketView from "./pages/TicketView";
 import Authorization from "./pages/Authorization";
 import FlightSearch from "./pages/FlightSearch";
 import FlightBooking from "./pages/FlightBooking";
@@ -166,6 +167,9 @@ class App extends Component {
           </Route>
           <Route exact path="/search/flight/booking">
             <FlightBooking/>
+          </Route>
+          <Route exact path="/booking/eticket/:id/:chainid">
+            <TicketView/>
           </Route>
           {/* <Router>
             <Home path="/" />

@@ -14,13 +14,14 @@ import "../App.css";
 
 var moment = require('moment');
 
-const PaxInfo = ({CommonStore, onPaxInfoChange}) => {
+const PaxInfo = ({CommonStore, onPaxInfoChange, value}) => {
     // const { source_city, destination_city, departure_date, return_date, traveller_choice } = selected_trip;
     // const [sourceCity, setSourceCity] = useState('');
-    const [adult, setAdult] = useState(0);
-    const [child, setChild] = useState(0);
-    const [infant, setInfant] = useState(0);
-    const [flightClass, setFlightClass] = useState(null);
+    let paxinfoValue = value || {class: 'Economy', adult: 1, child: 0, infant: 0};
+    const [adult, setAdult] = useState(paxinfoValue.adult);
+    const [child, setChild] = useState(paxinfoValue.child);
+    const [infant, setInfant] = useState(paxinfoValue.infant);
+    const [flightClass, setFlightClass] = useState(paxinfoValue.class);
     const [isCollapsed, setIsCollapsed] = useState(false);
     // const [message, setMessage] = useState('');
     // const [alertTitle, setAlertTitle] = useState('');
@@ -84,9 +85,9 @@ const PaxInfo = ({CommonStore, onPaxInfoChange}) => {
                 </div>
                 <div className={isCollapsed ? "pax-selection-container transform container-collapse" : "pax-selection-container transform"}>
                     <div id="passenger-box" className="flight-passenger-box dflex">
-                        <NumberSelector id="adult_count" selector_name="Adult" maxValue={9} numberValue={0} onValueChange={(value) => onPaxChange('adult', value)}/>
-                        <NumberSelector id="child_count" selector_name="Child" maxValue={5} numberValue={0} onValueChange={(value) => onPaxChange('child', value)}/>
-                        <NumberSelector id="infant_count" selector_name="Infant" maxValue={5} numberValue={0} onValueChange={(value) => onPaxChange('infant', value)}/>
+                        <NumberSelector id="adult_count" selector_name="Adult" maxValue={9} numberValue={adult} onValueChange={(value) => onPaxChange('adult', value)}/>
+                        <NumberSelector id="child_count" selector_name="Child" maxValue={5} numberValue={child} onValueChange={(value) => onPaxChange('child', value)}/>
+                        <NumberSelector id="infant_count" selector_name="Infant" maxValue={5} numberValue={infant} onValueChange={(value) => onPaxChange('infant', value)}/>
                     </div>
 
                     <OptionSelectorGroup options={["Economy", "Premium Economy", "Business"]} defaultSelectedIndex={0} onSelectionChange={(ev) => onSelectionChange(ev)} isMultiSelect={false}/>

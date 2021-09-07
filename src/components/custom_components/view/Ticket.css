@@ -1,0 +1,126 @@
+.ticket-view {
+    margin: 1.2rem 0px;
+    background: var(--primary-background);
+    padding: 15px 0;
+    /* background: #f2f2f2; */
+    border: 1px solid #e2e2e2;    
+}
+
+@media screen and (max-width: 985px) {
+    .ticket-view {
+        margin: 10px 0px;
+    }
+}
+  
+.apt-btmborder {
+    position: relative;
+    padding-bottom: 15px;
+}
+.desktop-bookback {
+    /* display: block; */
+    margin: 10px 0px 0px;
+}
+.apt-btmborder::before {
+    width: 103%;
+    bottom: 0;
+    left: -14px;
+    content: '';
+    position: absolute;
+    height: 1px;
+    background: #e5e5e5;
+}
+.apt-firstpr {
+    font-size: 13px;
+    background-color: #dadef7;
+    font-weight: bold;
+    padding: 5px 10px;
+    box-shadow: 0 1px 4px 0 rgb(0 0 0 / 14%);
+    border-radius: 3px;
+}
+.airline-logo {
+    width: 30px;
+    margin: 5px 5px 0px 2px;
+    vertical-align: middle;
+}
+.apt-ullist li {
+    display: inline-block;
+    vertical-align: top;
+    font-weight: bold;
+}
+.apt-btmborder ul, li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.apt-gridspan {
+    display: block;
+    line-height: 5px;
+    margin: 3px 0px;
+}
+.apt-listspan {
+    font-size: 10pt;
+}
+.apt-namelist li:first-child {
+    width: 40%;
+}
+.apt-namelist {
+    font-size: 13px;
+    font-family: monospace;
+    color: #2436b9;    
+}
+@media screen and (max-width: 786px) {
+    .apt-namelist {
+        font-size: .65rem;
+    }
+}
+.apt-namelist li {
+    display: inline-block;
+    /* font-weight: bold; */
+    vertical-align: top;
+}
+.apt-airportname {
+    display: grid;
+    line-height: 16px;
+}
+.apt-airplace {
+    position: relative;
+    display: grid;
+    line-height: 16px;
+}
+.apt-airterminal {
+    display: grid;
+}
+.apt-namelist li:nth-child(2) {
+    width: 18%;
+    font-size: 10px;
+    font-weight: normal;
+    line-height: 20px;
+}
+.apt-namelist li:last-child {
+    width: 40%;
+}
+.warning {
+    color: #d51111;
+    font-weight: 700;
+}
+.center-align {
+    text-align: center;
+}
+.document-field-title {
+    font-weight: 600;
+    text-align: right;
+}
+.document-field-value {
+    text-align: right;
+}
+.document-total {
+    border-top: 1px solid #000000;
+    border-bottom: 1px double #000000;
+}
+.financial-section {
+    margin: 5px 0px 15px 0px;
+}
+.lead-passenger::before {
+    content: "\2713 ";
+    color: #2ed042;
+}

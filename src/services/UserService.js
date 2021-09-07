@@ -274,4 +274,31 @@ export default class UserService {
             console.log(e);
         }
     }
+
+    getBookingById = async(bookingid, chainid) => {
+        const headers = new Headers();
+        if(this.token)
+            headers.append("Authorization", `Bearer ${this.token}`);
+
+        headers.append("Content-Type", "application/json");
+        
+        const url = `${process.env.REACT_APP_API_URL}/v1/user/booking/${bookingid}/${chainid}`;
+        
+        try
+        {
+            var options = {
+                method: "GET",
+                headers
+                //body: JSON.stringify(paymentData)
+            }
+            const request = await new Request(url, options);
+            const response = await fetch(request);
+
+            console.log(JSON.stringify(response));
+            return response.json();
+        }
+        catch(e) {
+            console.log(e);
+        }
+    }
 }

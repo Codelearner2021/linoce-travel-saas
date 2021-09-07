@@ -13,14 +13,17 @@ import "../App.css";
 var moment = require('moment');
 
 const TripSelector = ({history, CommonStore, UserStore, selected_trip, trip_type, cities, airlines }) => {
+    let tomorrow  = moment().add(1,'days');
+    let dayAfterTomorrow = moment().add(2,'days');
+
     const { source_city, destination_city, departure_date, return_date, traveller_choice } = selected_trip;
     const [sourceCity, setSourceCity] = useState('');
     const [destinationCity, setDestinationCity] = useState('');
     const [showReturnDate, setShowReturnDate] = useState(false);
     const [tripType, setTripType] = useState(trip_type);
-    const [deptDate, setDeptDate] = useState('');
-    const [arrvDate, setArrvDate] = useState('');
-    const [paxInfo, setPaxInfo] = useState({class: 'Economy', adult: 0, child: 0, infant: 0});
+    const [deptDate, setDeptDate] = useState(tomorrow.format('YYYY-MM-DD'));
+    const [arrvDate, setArrvDate] = useState(dayAfterTomorrow.format('YYYY-MM-DD'));
+    const [paxInfo, setPaxInfo] = useState({class: 'Economy', adult: 1, child: 0, infant: 0});
 
     useEffect(() => {
         setShowReturnDate(tripType === 'Roundtrip');
@@ -251,7 +254,7 @@ const TripSelector = ({history, CommonStore, UserStore, selected_trip, trip_type
                     <label className="form-label">
                         Departure Date :
                     </label>
-                    <Datetime className="datetime-picker-control" dateFormat="YYYY-MM-DD" timeFormat={false} onChange={onDeptDateChange} closeOnSelect={true} closeOnTab={true} isValidDate={disablePastDt}/>
+                    <Datetime className="datetime-picker-control" dateFormat="YYYY-MM-DD" timeFormat={false} onChange={onDeptDateChange} closeOnSelect={true} closeOnTab={true} isValidDate={disablePastDt} value={deptDate}/>
                 </Col>
                 {console.log(`showReturnDate => ${showReturnDate}`)}
                 {showReturnDate && (
@@ -259,13 +262,13 @@ const TripSelector = ({history, CommonStore, UserStore, selected_trip, trip_type
                     <label className="form-label">
                         Return Date :
                     </label>
-                    <Datetime className="datetime-picker-control" dateFormat="YYYY-MM-DD" timeFormat={false} onChange={onArrvDateChange} closeOnSelect={true} closeOnTab={true}/>
+                    <Datetime className="datetime-picker-control" dateFormat="YYYY-MM-DD" timeFormat={false} onChange={onArrvDateChange} closeOnSelect={true} closeOnTab={true} value={arrvDate}/>
                 </Col>
                 )}
             </Row>
             <Row>
                 <Col xs="12" sm="12" md={{size: 12}}>
-                    <PaxInfo onPaxInfoChange={onPaxChange}></PaxInfo>
+                    <PaxInfo onPaxInfoChange={onPaxChange} value={paxInfo}></PaxInfo>
                 </Col>
             </Row>
             <Row>

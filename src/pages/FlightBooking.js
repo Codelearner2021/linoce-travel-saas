@@ -4,6 +4,7 @@ import { Collapse, Container, TabContent, TabPane, Nav, NavItem, NavLink, Card, 
 import classnames from 'classnames';
 //import ClipLoader from "react-spinners/ClipLoader";
 import Switch from '../components/custom_components/switch/Switch'
+import TicketView from '../components/custom_components/view/Ticket'
 import Datetime from 'react-datetime';
 import PulseLoader from "react-spinners/PulseLoader";
 import "../App.css";
@@ -50,6 +51,8 @@ class FlightBooking extends Component {
 
         this.disablePastDt = this.disablePastDt.bind(this);
         this.toggleTab = this.toggleTab.bind(this);
+        this.readAgentContactInfo = this.readAgentContactInfo.bind(this);
+        this.showTicket = this.showTicket.bind(this);
 
         let selectedFlight = this.props.location.state.selectedFlight;
 
@@ -114,7 +117,7 @@ class FlightBooking extends Component {
                 infants: infants,
                 contactDetails: {
                     expanded: true,
-                    readAgentInfo: false,
+                    readAgentInfo: true,
                     mobile: '',
                     email: ''
                 },
@@ -163,21 +166,32 @@ class FlightBooking extends Component {
             (arg) => {
                 this.setState({
                     currentUser: this.props.CompanyStore.LoggedInUser.user
-                })
+                });
+
+                if(this.state.passengers.contactDetails.readAgentInfo)
+                    this.readAgentContactInfo({'target' : {'type': 'checkbox', 'checked': true, 'value': true}});
             }
         );
+
+        if(this.state.passengers.contactDetails.readAgentInfo)
+            this.readAgentContactInfo({'target' : {'type': 'checkbox', 'checked': true, 'value': true}});
 
         let result = await this.props.UserStore.getFareQuote(this.state.selected_flight.id)
         .then(response => {
             console.log(`Search Flight Result : ${JSON.stringify(response)}`);
-            let payment = this.state.payment;
-            payment.billedAmount = response.updatedFlightTicket ? response.updatedFlightTicket.pricing.totalPerPAX :  0.00;
-            this.setState(
-            {
-                selected_flight: response.updatedFlightTicket, 
-                price_changed: response.priceChanged,
-                payment: payment
-            });
+            if(response && !response.Failed) {
+                let payment = this.state.payment;
+                payment.billedAmount = response.updatedFlightTicket ? response.updatedFlightTicket.pricing.totalPerPAX :  0.00;
+                this.setState(
+                {
+                    selected_flight: response.updatedFlightTicket, 
+                    price_changed: response.priceChanged,
+                    payment: payment
+                });
+            }
+            else {
+                this.props.CommonStore.setAlert('Error!', response.Message, true, true);
+            }
         })
         .catch(error => {
             console.log(error);
@@ -357,6 +371,13 @@ class FlightBooking extends Component {
         });
     }
 
+    async showTicket(paymentInfo) {
+        this.props.history.push({
+            pathname: `/booking/eticket/${paymentInfo.booking.id}/${paymentInfo.booking.chainBookingId}`,
+            state: {booking : toJS(paymentInfo.booking)}
+        });
+    }
+
     async BookNow(event) {
         this.setState({processing: true});
         let paymentProcessingData = {
@@ -377,21 +398,19 @@ class FlightBooking extends Component {
         let payment_data = await this.props.UserStore.initiateBookingProcessing(paymentProcessingData)
         .then(response => {
             console.log(`Booking Info : ${JSON.stringify(response)}`);
-            response.booking = (response.booking && response.booking.length>0) ? response.booking[0] : {bookingNumber: ''};
-            let paymentInfo = response;
-            this.setState({paymentInfo: paymentInfo});
-            this.setState({processing: false});
-            this.setState({wallet: response.userWallet});
-            //console.log(`Initiating booking ...`);
-            //this.pref.current.processPayment(response);
-            //this.retryOnlinePaymentStatus = 0;
+            if(response && (response.Succeeded || response.status === 'success')) {
+                response.booking = (response.booking && response.booking.length>0) ? response.booking[0] : {bookingNumber: ''};
+                let paymentInfo = response;
+                this.setState({paymentInfo: paymentInfo});
+                this.setState({processing: false});
+                this.setState({wallet: response.userWallet});
 
-            // if(response.transactionId) {
-            //     this.timeoutHandler = setTimeout((traceid) => {
-            //         this.checkOnlinePaymentStatus(traceid);
-            //     }, 2000, response.transactionId);
-            // }
-
+                this.showTicket(paymentInfo);
+            }
+            else {
+                if(response && (response.Failed || response.status !== 'success'))
+                    this.props.CommonStore.setAlert('Error!', response.Message, true, true);
+            }
             return response;
         })
         .catch(error => {
@@ -421,6 +440,8 @@ class FlightBooking extends Component {
                 console.log(`Payment stauts : ${paymentInfo.status} | Booking Id : ${paymentInfo.booking ? paymentInfo.booking.id : -1}`);
 
                 this.pref.current.processComplete(paymentInfo.status);
+
+                this.showTicket(paymentInfo);
             }
             else {
                 if(this.retryOnlinePaymentStatus > 1000) {
@@ -1360,7 +1381,7 @@ class FlightBooking extends Component {
                     <CardBody>
                         <Row>
                             <Col xs="12" sm="12" md={{size: 12}} className="">
-                                Booking # {this.state.paymentInfo.booking.bookingNumber}
+                                Booking # {this.state.paymentInfo.booking.bookingNumber} | {this.state.paymentInfo.booking.chainBookingId} | {this.state.paymentInfo.booking.id} | {this.state.paymentInfo.status}
                             </Col>
                         </Row>
                     </CardBody>
@@ -1371,7 +1392,8 @@ class FlightBooking extends Component {
                         <Row>
                             <Col xs="12" sm="12" md={{size: 12}} className="">
                                 <Button outline color="primary" className="asr-book" onClick={(ev) => this.BookNow(ev)} disabled={(!this.state.payment.useWallet && !this.state.payment.useCredit) || this.state.processing}>
-                                    <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span>Pay &amp; Book Now ₹{this.state.selected_flight.pricing.totalPerPAX}</span>
+                                    <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span>Pay &amp; Book Now ₹{this.state.selected_flight.pricing.totalPerPAX}</span>&nbsp;
+                                    {this.state.processing ? <PulseLoader color="#ffffff" loading={this.state.processing} size={10} /> : null}
                                 </Button>
                             </Col>
                         </Row>                
@@ -1398,7 +1420,8 @@ class FlightBooking extends Component {
                         <Row>
                             <Col xs="12" sm="12" md={{size: 12}} className="">
                                 <Button outline color="primary" className="asr-book" onClick={(ev) => this.ProcessPaymentOnline(ev)} disabled={!this.state.payment.useOnline || this.state.processing}>
-                                    <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span>Pay &amp; Book Now ₹{this.state.selected_flight.pricing.totalPerPAX}</span>
+                                    <i className="fa fa-credit-card" aria-hidden="true"></i>&nbsp;<span>Pay &amp; Book Now ₹{this.state.selected_flight.pricing.totalPerPAX}</span>&nbsp;
+                                    {this.state.processing ? <PulseLoader color="#ffffff" loading={this.state.processing} size={10} /> : null}
                                 </Button>
                             </Col>
                         </Row>
@@ -1412,7 +1435,7 @@ class FlightBooking extends Component {
                         {(this.state.paymentInfo.status && this.state.paymentInfo.status!=='') ? 
                         <Row>
                             <Col xs="12" sm="12" md={{size: 12}} className="">
-                                Booking # {this.state.paymentInfo.booking.bookingNumber}
+                                Booking # {this.state.paymentInfo.booking.bookingNumber} | {this.state.paymentInfo.booking.chainBookingId} | {this.state.paymentInfo.booking.id} | {this.state.paymentInfo.status}
                             </Col>
                         </Row>
                         : null }
@@ -1533,15 +1556,22 @@ class FlightBooking extends Component {
         const PaymentInfo = this.getPaymentInfo(this.state.selected_flight);
         const PricingInfo = this.getFlightPricingInfo(this.state.selected_flight);
 
+        const booking = this.state.paymentInfo.booking;
+        console.log(`Booking Status -> ${this.state.paymentInfo.status}`);
+
         return (
-            <Row>
-                <Col xs="12" sm="12" md={{size: 9}} className="no-padding-right">
-                    {PaymentInfo}
-                </Col>
-                <Col xs="12" sm="12" md={{size: 3}} className="no-padding-left">
-                    {PricingInfo}
-                </Col>
-            </Row>
+            <>
+            { (!this.state.paymentInfo.status || this.state.paymentInfo.status=='') ? 
+                <Row>
+                    <Col xs="12" sm="12" md={{size: 9}} className="no-padding-right">
+                        {PaymentInfo}
+                    </Col>
+                    <Col xs="12" sm="12" md={{size: 3}} className="no-padding-left">
+                        {PricingInfo}
+                    </Col>
+                </Row>
+            : null }
+            </>
         )
     }
 
@@ -1581,11 +1611,13 @@ class FlightBooking extends Component {
         return (
             <div id='booking'>
                 <Container className="themed-container" fluid={true}>
+                    {(!this.state.paymentInfo.status || this.state.paymentInfo.status === '') ? 
                     <Row>
                         <Col xs="12" sm="12" md={{size: 12}}>
                             {Header}
                         </Col>
                     </Row>
+                    : null }
                     {StepView}
                 </Container>
             </div>
