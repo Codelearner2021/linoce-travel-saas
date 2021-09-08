@@ -124,3 +124,106 @@
     content: "\2713 ";
     color: #2ed042;
 }
+.filter-section {
+    position: sticky !important;
+    top: 80px;
+    max-height: 500px;
+    background-color: #ffffff;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.filter-title {
+    padding: 5px;
+    border-bottom: 1px solid #5c5c5ca1;
+    margin: 5px 0px 10px 0px;
+}
+ul.stop-item, ul.time-item {
+    padding: 0px;
+    list-style: none;
+    width: 100%;
+    /* margin: 0; */
+    /* padding: 0 0 0 1em; */
+    /* text-indent: -1em; */
+    /* display: block; */
+}
+.stop-item li, .time-item li {
+    /* display: inline;
+    padding: 5px; */
+    line-height: 30px;
+    font-size: 15px;
+    margin-right: -1px;
+    height: 40px;
+    /* position: relative; */
+    display: inline-block;
+    border: 1px solid #ccc;
+    text-align: center;
+    background: #f2faff;
+    width: 25%;
+    cursor: pointer;
+}
+.stop-item li:first-child, .time-item li:first-child {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+.stop-item li:last-child, .time-item li:last-child {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+.stop-item li a {
+    line-height: 35px;
+    text-decoration: none;
+    color: #000000;    
+}
+.time-item li a {
+    line-height: 35px;
+    text-decoration: none;
+    color: #000000;    
+    width: 50px;
+    font-weight: normal;
+    font-size: 12px;
+    display: inline-block;    
+}
+.icon-morning {
+    background-image: url(../../../img/linoceicon.svg#morning);
+    background-repeat: no-repeat;
+    background-position: center center;    
+}
+.icon-noon {
+    background-image: url(../../../img/linoceicon.svg#noon);
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+.icon-evening {
+    background-image: url(../../../img/linoceicon.svg#evening);
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+.icon-night {
+    background-image: url(../../../img/linoceicon.svg#night);
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+.icon_aftsort {
+    position: relative;
+    left: 1px;
+    top: -15px;
+    /* height: 20px; */
+    color: #666;
+}
+.icon_sort {
+    /* position: absolute; */
+    /* top: 0; */
+    /* left: 0; */
+    width: 50px;
+    height: 30px;
+    display: block;
+    /* margin: 0px; */
+    padding: 0px;
+}
+.ticket-view-container {
+    background: var(--primary-background);
+    /* min-height: 650px; */
+}
+.print {
+    margin-bottom: 10px;
+}

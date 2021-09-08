@@ -1443,3 +1443,9 @@ p {
 li.nav-item { 
   cursor: pointer;
 }
+.selected {
+  background-color: #89ed94 !important;
+}
+.selected a {
+  color: #ffffff;
+}

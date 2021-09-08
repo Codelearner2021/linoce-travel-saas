@@ -146,7 +146,7 @@ export class Ticket extends Component {
                             <img className="airline-logo reviewbox__airlineLogo" src={image_path}/>
                         </li>
                         <li className="apt-listspan">
-                            {ticket.airline.displayName}<span className="apt-gridspan at-fontweight graycolor">{`${ticket.airline.airCode}-${ticket.flightNo} | Fare Class: ${ticket.passengerClass}`}</span>
+                            {ticket.airline.displayName}<span className="apt-gridspan at-fontweight graycolor">{`${ticket.airline.airCode}-${ticket.flightNo} | ${ticket.passengerClass}`}</span>
                             <span className="ticketid graycolor">{ticket.refundable == 'Y' ? 'Refundable' : 'Non-Refundable'}</span>
                             {/* <span className="label label-purple ars-flightlabel ars-refunsleft">{ticket.dataCollectedFrom}</span> */}
                         </li>

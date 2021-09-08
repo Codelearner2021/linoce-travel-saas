@@ -9,6 +9,7 @@ import Datetime from 'react-datetime';
 import PulseLoader from "react-spinners/PulseLoader";
 import "../App.css";
 import "../styles/TicketView.css";
+import html2pdf from 'html2pdf.js';
 import Login from './Login';
 import Register from './Register';
 import { toJS, reaction } from 'mobx';
@@ -46,6 +47,7 @@ class TicketView extends Component {
 
         //this.showTicket = this.showTicket.bind(this);
         //this.props.location.state.booking
+        this.GeneratePDF =  this.GeneratePDF.bind(this);
 
         this.state = {
             currentUser: toJS(this.props.CompanyStore.LoggedInUser.user),
@@ -130,6 +132,18 @@ class TicketView extends Component {
         }
     }
 
+    GeneratePDF = (event, elementid, filename) => {
+        let element = document.getElementById(elementid);
+        var opt = {
+            margin:       [1,1,1,1],
+            filename:     filename,
+            image:        { type: 'jpeg', quality: 1 },
+            html2canvas:  { dpi: 192, scale: 1},
+            jsPDF:        { unit: 'mm', format: 'a3', orientation: 'portrait' }
+        };        
+
+        html2pdf().set(opt).from(element).save(filename);
+    }
 
     render() {
         let booking = this.state.booking;
@@ -140,8 +154,11 @@ class TicketView extends Component {
             <>
             { booking ? 
             <div id='ticket'>
-                <Container className="themed-container" fluid={true}>
-                    <Ticket booking={booking} bookingid={booking ? booking.id : -1} chainid={booking ? booking.chainBookingId : null} title="E - Ticket" />
+                <Container className="themed-container ticket-view-container" fluid={true}>
+                    <Ticket booking={booking} bookingid={booking ? booking.id : -1} chainid={booking ? booking.chainBookingId : null} title="E - Ticket" id="ticket-view"/>
+                    <Button outline color="primary" className="print" onClick={(ev) => this.GeneratePDF(ev, 'ticket-view', `Booking-${booking.bookingNumber}.pdf`)}>
+                        <i className="fa fa-file-pdf-o" aria-hidden="true"></i>&nbsp;<span>Generate PDF</span>
+                    </Button>
                 </Container>
             </div>
             : null }

@@ -45,26 +45,42 @@ class FlightSearch extends Component {
         // this.state = {
         //     active: this.initialActive ? this.initialActive : 'login'
         // }
+        this.applyFilter = this.applyFilter.bind(this);
 
         this.props.location.state && this.props.location.state.payload && console.log(`Props => ${JSON.stringify(this.props.location.state.payload)}`);
 
         this.state = {
             payload: (this.props.location.state && this.props.location.state.payload) ? this.props.location.state.payload : null,
             selectedTicketId: -1,
-            expandedSection: -1
+            expandedSection: -1,
+            departureCity: 'XXXX',
+            arrivalCity: 'XXXX',
+            filter: {
+                stop: [],
+                departure: [],
+                arrival: []
+            }
         }
     }
 
     async componentDidMount() {
         console.log(`Flight Search => ${JSON.stringify(this.state.payload)}`);
 
-        let result = await this.props.UserStore.searchMyFlights(this.state.payload)
-        .then(response => {
-            //console.log(`Search Flight Result : ${JSON.stringify(response)}`);
-        })
-        .catch(error => {
-            console.log(error);
-        });
+        if(this.state.payload) {
+            let result = await this.props.UserStore.searchMyFlights(this.state.payload)
+            .then(response => {
+                //console.log(`Search Flight Result : ${JSON.stringify(response)}`);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        }
+        else {
+            this.props.history.push({
+                pathname: '/',
+                state: {}
+            });            
+        }
     }
 
 //   changeScreenMode = () => {
@@ -165,6 +181,7 @@ class FlightSearch extends Component {
             currency: 'INR',
         });
 
+        console.log(`Source City: ${flight.sourceLocation.code} | Destination City: ${flight.sourceLocation.code}`);
         let image_path = '';
         try {
             image_path = require(`../img/airlines/${flight.airlineInfo.image}`)
@@ -303,11 +320,140 @@ class FlightSearch extends Component {
         return flight_list;
     }
 
+    applyFilter(field, value) {
+        let stops = this.state.filter.stop;
+        let departure = this.state.filter.departure;
+        let arrival = this.state.filter.arrival;
+
+        if(field == 'stop') {
+            let present = false;
+            stops = stops.filter((val, idx) => {
+                if(val == value) {
+                    present = true;
+                }
+                return (val !== value);
+            });
+
+            if(!present) {
+                stops.push(value);
+            }
+        }
+
+
+        if(field == 'departure') {
+            let present = false;
+            departure = departure.filter((val, idx) => {
+                if(val == value) {
+                    present = true;
+                }
+                return (val !== value);
+            });
+
+            if(!present) {
+                departure.push(value);
+            }
+        }
+
+
+        if(field == 'arrival') {
+            let present = false;
+            arrival = arrival.filter((val, idx) => {
+                if(val == value) {
+                    present = true;
+                }
+                return (val !== value);
+            });
+
+            if(!present) {
+                arrival.push(value);
+            }
+        }        
+
+        this.setState({
+            filter: {
+                stop: stops,
+                departure: departure,
+                arrival: arrival
+            }
+        })
+
+        this.props.UserStore.applyFilter2SearchResult({stop: stops, departure: departure, arrival: arrival});
+    }
+
+    getFilters(flights) {
+        let departureCity = 'XXXX';
+        let arrivalCity = 'XXXX';
+
+        if(flights && flights.length>0) {
+            let flight = flights[0];
+            departureCity = flight.sourceLocation.code;
+            arrivalCity = flight.destinationLocation.code;
+        }
+        let stops = this.state.filter.stop || [];
+        let departures = this.state.filter.departure || [];
+        let arrivals = this.state.filter.arrival || [];
+
+        return (
+            <>
+            <Row className="filter-item">
+                <Col xs="12" sm="12" md={{size: 12}}>
+                    <div className="filter-title">Stops</div>
+                    <ul className="stop-item">
+                        <li className={stops.includes(0) ? 'selected' : ''} onClick={(ev) => this.applyFilter('stop', 0) }><a href>0</a></li>
+                        <li className={stops.includes(1) ? 'selected' : ''} onClick={(ev) => this.applyFilter('stop', 1) }><a href>1</a></li>
+                        <li className={stops.includes(2) ? 'selected' : ''} onClick={(ev) => this.applyFilter('stop', 2) }><a href>2</a></li>
+                        <li className={stops.includes(3) ? 'selected' : ''} onClick={(ev) => this.applyFilter('stop', 3) }><a href>3+</a></li>
+                    </ul>
+                </Col>
+            </Row>
+            <Row className="filter-item">
+                <Col xs="12" sm="12" md={{size: 12}}>
+                    <div className="filter-title">Departure from {departureCity}</div>
+                    <ul className="time-item">
+                        <li className="time-item-morning" className={departures.includes(0) ? 'selected' : ''} onClick={(ev) => this.applyFilter('departure', 0)}>
+                            <a href className="depselect-list"><span className="icon_sort icon-morning"></span><span className="icon_aftsort">00-06</span></a>
+                        </li>
+                        <li className="time-item-noon" className={departures.includes(1) ? 'selected' : ''} onClick={(ev) => this.applyFilter('departure', 1)}>
+                            <a href className="depselect-list"><span className="icon_sort icon-noon"></span><span className="icon_aftsort">06-12</span></a>
+                        </li>
+                        <li className="time-item-afternoon" className={departures.includes(2) ? 'selected' : ''} onClick={(ev) => this.applyFilter('departure', 2)}>
+                            <a href className="depselect-list"><span className="icon_sort icon-evening"></span><span className="icon_aftsort">12-18</span></a>
+                        </li>
+                        <li className="time-item-evening" className={departures.includes(3) ? 'selected' : ''} onClick={(ev) => this.applyFilter('departure', 3)}>
+                            <a href className="depselect-list"><span className="icon_sort icon-night"></span><span className="icon_aftsort">18-00</span></a>
+                        </li>
+                    </ul>
+                </Col>
+            </Row>
+            <Row className="filter-item">
+                <Col xs="12" sm="12" md={{size: 12}}>
+                    <div className="filter-title">Arrival to {arrivalCity}</div>
+                    <ul className="time-item">
+                        <li className="time-item-morning" className={arrivals.includes(0) ? 'selected' : ''} onClick={(ev) => this.applyFilter('arrival', 0)}>
+                            <a href className="depselect-list"><span className="icon_sort icon-morning"></span><span className="icon_aftsort">00-06</span></a>
+                        </li>
+                        <li className="time-item-noon" className={arrivals.includes(1) ? 'selected' : ''} onClick={(ev) => this.applyFilter('arrival', 1)}>
+                            <a href className="depselect-list"><span className="icon_sort icon-noon"></span><span className="icon_aftsort">06-12</span></a>
+                        </li>
+                        <li className="time-item-afternoon" className={arrivals.includes(2) ? 'selected' : ''} onClick={(ev) => this.applyFilter('arrival', 2)}>
+                            <a href className="depselect-list"><span className="icon_sort icon-evening"></span><span className="icon_aftsort">12-18</span></a>
+                        </li>
+                        <li className="time-item-evening" className={arrivals.includes(3) ? 'selected' : ''} onClick={(ev) => this.applyFilter('arrival', 3)}>
+                            <a href className="depselect-list"><span className="icon_sort icon-night"></span><span className="icon_aftsort">18-00</span></a>
+                        </li>
+                    </ul>
+                </Col>
+            </Row>
+            </>
+        )
+    }
+
     /* <FlightItem flight={flight}></FlightItem> */
     render() {
         console.log(`Is processing ? => ${this.props.UserStore.SearchResult_Flights.processing}`);
         //const newFlightList = this.getGroupedFlights(this.props.UserStore.SearchResult_Flights.result);
         const Header = this.getHeader();
+        const Filter = this.props.UserStore.SearchResult_Flights.processing ? null : this.getFilters(this.props.UserStore.SearchResult_Flights.result);
 
         //console.log(`Final Group Result: ${newFlightList}`);
 
@@ -315,10 +461,10 @@ class FlightSearch extends Component {
             <div id='landing'>
                 <Container className="themed-container" fluid={true}>
                     <Row>
-                        <Col xs="12" sm="12" md={{size: 3}}>
-                            <span></span>
+                        <Col xs="12" sm="12" md={{size: 2}} className="filter-section">
+                            {Filter}
                         </Col>
-                        <Col xs="12" sm="12" md={{size: 9}}>
+                        <Col xs="12" sm="12" md={{size: 10}}>
                             <div id="search-result-container">
                                 {Header}
                                 {(this.props.UserStore.SearchResult_Flights.result && 
@@ -330,7 +476,7 @@ class FlightSearch extends Component {
                                     : (
                                         this.props.UserStore.SearchResult_Flights.processing ? 
                                             <div className="progressSection">
-                                                <PulseLoader color="#ffffff" loading={this.props.UserStore.SearchResult_Flights.processing} size={50} />
+                                                <PulseLoader color="#ffffff" loading={this.props.UserStore.SearchResult_Flights.processing} size={30} />
                                             </div>
                                         :
                                             <span className="process-status">No records found</span>

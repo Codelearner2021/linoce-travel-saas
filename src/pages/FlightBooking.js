@@ -191,6 +191,7 @@ class FlightBooking extends Component {
             }
             else {
                 this.props.CommonStore.setAlert('Error!', response.Message, true, true);
+                this.BackToFlightSearch(null, this.props.UserStore.SearchResult_Flights.payload);
             }
         })
         .catch(error => {
@@ -408,8 +409,10 @@ class FlightBooking extends Component {
                 this.showTicket(paymentInfo);
             }
             else {
-                if(response && (response.Failed || response.status !== 'success'))
+                if(response && (response.Failed || response.status !== 'success')) {
                     this.props.CommonStore.setAlert('Error!', response.Message, true, true);
+                    this.BackToFlightSearch(null, this.props.UserStore.SearchResult_Flights.payload);
+                }
             }
             return response;
         })
@@ -446,6 +449,8 @@ class FlightBooking extends Component {
             else {
                 if(this.retryOnlinePaymentStatus > 1000) {
                     clearTimeout(this.timeoutHandler);
+                    this.props.CommonStore.setAlert('Error!', "Unable to get response within timeout. Your booking session expired", true, true);
+                    this.BackToFlightSearch(null, this.props.UserStore.SearchResult_Flights.payload);                    
                 }
                 else {
                     this.retryOnlinePaymentStatus++;
@@ -647,7 +652,7 @@ class FlightBooking extends Component {
                                     <img className="airline-logo reviewbox__airlineLogo" src={image_path}/>
                                 </li>
                                 <li className="apt-listspan">
-                                    {segment.airline.airlineName}<span className="apt-gridspan at-fontweight graycolor">{`${segment.airline.airlineCode}-${segment.airline.flightNumber} | Fare Class: ${segment.airline.fareClass}`}</span>
+                                    {segment.airline.airlineName}<span className="apt-gridspan at-fontweight graycolor">{`${segment.airline.airlineCode}-${segment.airline.flightNumber} | ${segment.airline.fareClass}`}</span>
                                     <span className="ticketid graycolor">{flight.id}</span>
                                     <span className="label label-purple ars-flightlabel ars-refunsleft">{flight.inventorySourceName}</span>
                                 </li>

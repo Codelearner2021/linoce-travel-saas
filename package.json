@@ -10,6 +10,7 @@
     "dotenv": "^6.0.0",
     "font-awesome": "^4.7.0",
     "history": "^4.10.1",
+    "html2pdf.js": "^0.10.1",
     "mobx": "^6.3.2",
     "mobx-react": "^7.2.0",
     "react": "^16.13.1",

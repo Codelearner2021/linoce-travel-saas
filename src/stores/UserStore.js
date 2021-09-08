@@ -1,5 +1,6 @@
 import { makeAutoObservable, decorate, observable, computed, action, extendObservable, runInAction } from 'mobx';
 import UserService from '../services/UserService';
+var moment = require('moment');
 
 export class User {
     id = -1;
@@ -54,6 +55,7 @@ class UserStore {
         processing: false,
         processing_suspended: false,
         result: [],
+        originalSearchResult: [],
         search_traceid: null,
         price_changed: false,
         updatedFlight: null,
@@ -186,9 +188,9 @@ class UserStore {
                         }
                         else {
                             this.SearchResult_Flights.processing = false;
+                            this.SearchResult_Flights.originalSearchResult = this.SearchResult_Flights.result;
+                            console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights.result)}`);
                         }
-        
-                        //console.log(`Flights => ${JSON.stringify(this.SearchResult_Flights.result)}`);
                     });
         
                     if(this.SearchResult_Flights.processing && !this.SearchResult_Flights.processing_suspended) {
@@ -202,6 +204,23 @@ class UserStore {
                 reject(ex);
             }
         });
+    }
+
+    applyFilter2SearchResult(filter) {
+        let flights = this.SearchResult_Flights.originalSearchResult;
+
+        var filteredResult = flights.filter((flight, idx) => {
+            let dept_hr = moment(flight.departureDateTime).hours();
+            let dept_index = Math.floor(dept_hr/6);
+            let arrv_hr = moment(flight.arrivalDateTime).hours();
+            let arrv_index = Math.floor(arrv_hr/6);
+
+            return (filter.stop == undefined || filter.stop.length == 0 || filter.stop.includes(flight.noOfStops)) && 
+            (filter.departure == undefined || filter.departure.length == 0 || filter.departure.includes(dept_index)) && 
+            (filter.arrival == undefined || filter.arrival.length == 0 || filter.arrival.includes(arrv_index));
+        });
+
+        this.SearchResult_Flights.result = filteredResult;
     }
 
     getFlightById(id) {
@@ -377,7 +396,7 @@ class UserStore {
 
                 this.SearchResult_Flights.booking = result.data.booking;
 
-                console.log(`User => ${JSON.stringify(this.User)}`);
+                //console.log(`User => ${JSON.stringify(this.User)}`);
             });
 
             return result.data.booking;
